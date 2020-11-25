@@ -58,7 +58,7 @@ dplyr aims to provide a function for each basic verb of data manipulation. These
   * `select()` changes whether or not a column is included.
   * `rename()` changes the name of columns.
   * `mutate()` changes the values of columns and creates new columns.
-  * `summarise()` collapses a group into a single row.
+  * `summarize()` collapses a group into a single row.
   * `group_by()` group data into rows with the same values
   * `ungroup()` remove grouping information from data frame.
   * `distinct()` remove duplicate rows. 
@@ -79,7 +79,9 @@ summary(penguins)
 dim(penguins)
 ```
 
-Now let's use the `filter()` function in `dplyr` to grab only the gentoo penguins:
+### dplyr functions
+
+Now we'll demonstrate how the `dplyr` functions can be used to subset, transform and summarize data. We can use the `filter()` function in `dplyr` to grab only the gentoo penguins:
 
 ```{r}
 gentoo = filter(penguins, species=="Gentoo")
@@ -112,10 +114,59 @@ gentoo_ladies = penguins %>% filter(species=="Gentoo", sex=="female")
 
 This piping style of writing code becomes incredibly efficient when you start to string lots of data manipulation tasks together. 
 
+Now let's use the `summarize()` function to find the mean mass (in grams) of all of the female penguins in the dataset:
 
+```{r}
+female_mean_mass = penguins %>% filter(sex == "female") %>% summarize(mean_mass_g = mean(body_mass_g))
+female_mean_mass
+```
+Note how we used the pipes to string several `dplyr` functions together. We start with the data set that we are interested in working with (`penguins`), then use `filter()` to separate out females only, then use the `summarize()` function to find the mean value of the column `body_mass_g`. Now that you see how we can link several actions together using the `%>%` pipe, let's add some white space to the code to make it even easier to read. The pipe allows you to separate the command chain into new lines in your script document, but when you run the code it is all run together as a single line of code:
 
+```{r}
+female_mean_mass = penguins %>% 
+  filter(sex == "female") %>% 
+  summarize(mean_mass_g = mean(body_mass_g))
+```
 
+This is the standard coding etiquette used when writing piped dplyr commands because it's easier to skim your eye along the left side of the script and get a sense of what actions are occuring and in what order. This may not seem like a big deal at the moment, but as our transformations become more complex, this will greatly improve readability.
 
+This is much cleaner to write, and easier to read, than if we did this in base R: 
+
+```{r}
+female_penguins = penguins[which(penguins$sex == "female"), ] 
+female_mean_mass = mean(female_penguins$body_mass_g)
+
+# Or to do it all in one line of code: 
+female_mean_mass = mean(unlist(penguins[which(penguins$sex == "female"), "body_mass_g"]))
+```
+
+The `dplyr` syntax is simpler, and the name of the original dataset (`penguins`) does not need to be repeated when using `filter()`, unlike when using `which()`. Base R also requires the creation of an interim variable, or if you want it to all fit into one line of code, you must use the `which()` function to subset across rows and columns simultaneously and then `unlist()` your `data.frame` or `tibble` so that it can be read into the `mean()` function as an array. 
+
+### More dplyr functions
+
+Now let's ratchet up our analysis a few notches and say that you need to know the mean body mass for each sex of each penguin species. Perhaps you want to throw out unknown sex birds so that they don't bias your data. You can use `group_by()` to indicate that you want to consider each sex and each species as a distinct dataset when you use the `summarize()` function. Let's finish it off by printing it out to the console with `print()`. These may be valuable summary statistics that we want to refer back to when we are writing up our analysis, or perhaps we'll want to include the results in a table in a presentation at a conference. Either way, let's save our new summary table of mean body mass to a `.csv` in our project folder:
+
+```{r}
+penguin_mean_mass = penguins %>% 
+  filter(!is.na(sex)) %>%   # Removes rows where sex is NA. Read the ! as the word "not" here - i.e. it flips the logical value
+  group_by(species, sex) %>%
+  summarize(mean_mass_g = mean(body_mass_g)) %>%
+  print()
+write_csv(penguin_mean_mass, path="data/processed/peguin_mean_body_mass_g.csv")
+```
+
+Note, I used `write_csv()` in the `dplyr` package, but this is almost equivalent to `write.csv()` in base R. It doesn't really matter which write function you use here.
+
+So that's a nice, neat, easy to read analysis that takes advantage of the consistent syntactical format across `dplyr` functions and avoids unnecessary repetition. If we calculated the same summary statistics in base R, we'd have to repeat the analysis separately for each combination of species / sex, or write an unwiedly for loop that stepped through the data subsets.
+
+We used the `mean()` function in our dplyr `summarize()` command, but there are many different summary functions that can be used inside of  `summarize()`:
+
+*  Center:   mean(), median()
+*  Spread:   sd(), IQR(), mad()
+*  Range:    min(), max(), quantile()
+*  Position: first(), last(), nth(),
+*  Count:    n(), n_distinct()
+*  Logical:  any(), all()
 
 
 
