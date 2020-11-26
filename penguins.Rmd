@@ -3,3 +3,17 @@ title: "penguins"
 author: "MSCI 599"
 output: html_document
 ---
+
+
+palmerpenguins data are used for many different types of tutorials:
+
+ggplot:
+https://allisonhorst.github.io/palmerpenguins/articles/examples.html
+https://allisonhorst.github.io/palmerpenguins/articles/intro.html
+
+MANOVA and Canonical Discrimination Analysis:
+https://rpubs.com/friendly/penguin-manova
+
+PCA:
+https://allisonhorst.github.io/palmerpenguins/articles/pca.html
+https://rpubs.com/friendly/penguin-biplots

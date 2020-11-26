@@ -79,7 +79,7 @@ summary(penguins)
 dim(penguins)
 ```
 
-### dplyr functions
+### Using dplyr functions: filter()
 
 Now we'll demonstrate how the `dplyr` functions can be used to subset, transform and summarize data. We can use the `filter()` function in `dplyr` to grab only the gentoo penguins:
 
@@ -142,7 +142,7 @@ female_mean_mass = mean(unlist(penguins[which(penguins$sex == "female"), "body_m
 
 The `dplyr` syntax is simpler, and the name of the original dataset (`penguins`) does not need to be repeated when using `filter()`, unlike when using `which()`. Base R also requires the creation of an interim variable, or if you want it to all fit into one line of code, you must use the `which()` function to subset across rows and columns simultaneously and then `unlist()` your `data.frame` or `tibble` so that it can be read into the `mean()` function as an array. 
 
-### More dplyr functions
+### More dplyr functions: filter() group_by() summarize() print()
 
 Now let's ratchet up our analysis a few notches and say that you need to know the mean body mass for each sex of each penguin species. Perhaps you want to throw out unknown sex birds so that they don't bias your data. You can use `group_by()` to indicate that you want to consider each sex and each species as a distinct dataset when you use the `summarize()` function. Let's finish it off by printing it out to the console with `print()`. These may be valuable summary statistics that we want to refer back to when we are writing up our analysis, or perhaps we'll want to include the results in a table in a presentation at a conference. Either way, let's save our new summary table of mean body mass to a `.csv` in our project folder:
 
@@ -167,6 +167,56 @@ We used the `mean()` function in our dplyr `summarize()` command, but there are 
 *  Position: first(), last(), nth(),
 *  Count:    n(), n_distinct()
 *  Logical:  any(), all()
+
+### More dplyr functions: group_by() summarize() mutate() distinct() select() arrange()
+
+Here are a few more examples of simple things you can do with `dplyr`:
+
+```{r}
+# Which species has the most observations?
+n_by_species = penguins %>%
+  group_by(species) %>%
+  summarize(n = n()) %>%
+  print()
+
+# Use mutate() to convert body mass units:
+penguins_for_america = penguins %>%
+  mutate(body_mass_lb = body_mass_g * 0.0022) # 0.0022 lb/g
+
+# Quickly display the names of all of the islands surveyed:
+penguins %>%
+  distinct(island)
+
+# Remove bill data:
+penguins_no_bill = penguins %>%
+  select(-bill_length_mm, bill_depth_mm)
+
+# Sort data by island, then species, then sex:
+penguins_sorted = penguins %>%
+  arrange(island, species, sex)
+```
+
+
+### More Information:
+
+The official (recommended, not required) text assigned for this class is R for Data Science by Hadely Wickham and Garrett Grolemund:
+
+https://r4ds.had.co.nz/
+
+Since Hadley is the developer of the `Tidyvserse` suite of packages, his text is a great resource for learning more about `dplyr.`
+
+### Acknowledgements
+
+Dr. Allison Horst at the Bren School at UC Santa Barbara is one of the masterminds of the `palmerpenguins` R package. She has created a lot of R training content that has been inspirational here and other places throughout the course. She hosts a great website and lots of content on GitHub that is worth perusing if you are interested in diving deeper into data science in R:
+
+https://allisonhorst.github.io/
+
+Allison's data science-themed artwork is especially unique and inspirational:
+
+https://github.com/allisonhorst/stats-illustrations
+
+
+
 
 
 
