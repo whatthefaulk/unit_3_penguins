@@ -1,0 +1,138 @@
+---
+title: "ggplot_intro"
+author: "MSCI 599"
+output: html_document
+---
+
+### ggplot2: visualizing data in the tidyverse
+
+Now we will learn how to visualise your data using ggplot2. R has several systems for making graphs, but ggplot2 is one of the most elegant and most versatile. You can do more faster by learning one system and applying it to many different types of figures.
+
+We start by loading the `tidyverse.` Note again, that you could just load the package `ggplot2` and that would also give you access to all of the `ggplot2` functions. However, by loading the `tidyverse` we can get ggplot2 and dplyr loaded at the same time (as well as some other packages that data scientists frequently like to use). Let's also load up our Antarctic penguins dataset:
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+### Note about namespaces:
+
+It's worth noting the messages and warnings that you get when you load in a package. In this case, we see that we are actually loading a series of packages, and all of the package versions are listed. There is also a warning about conflicts. Conflicts occur in your function namespace when you have libraries loaded with functions that have the exact same name as functions in other libraries that you loaded, or in base R. For example, there is a `filter()` function in the R `stats` package (which is automatically loaded as part of base R). There is also a `filter()` function in `dplyr`, which we used in the previous lesson. This unfortunately creates some confusion because now you may not be sure which filter() function you are actually using.
+
+If two packages use the same function name, then the package loaded last will hide the function from earlier packages. This is called *masking*. When masking occurs and you're not sure which package you loaded last, you can just type the name of the function into the console as a command and read the output. The namespace associated with the function will indicate which package the function is coming from:
+
+```{r}
+filter
+```
+
+Let's say you actually wanted to use the `stats` package version of filter. You can specify exactly what namespace to use in front of the function like this:
+
+```{r, eval=FALSE}
+stats::filter
+```
+
+In many of my scripts, I use `dplyr`'s `select()` function to choose which columns I am interested in keeping. However, one of the other packages I frequently use has a `select()` function, so I need to specify the dplyr package before calling `select()`:
+
+```{r}
+species_islands = penguins %>% dplyr::select(species, island)
+```
+
+If you are getting unexpected behavior or output and you've triple checked your code, it may be that you aren't using the function you thought you were due to masking.
+
+### Scatterplot
+
+With `ggplot2`, you begin a plot with the function `ggplot()`. `ggplot()` creates a coordinate system that you can add layers to. The first argument of `ggplot()` is the dataset to use in the graph. So `ggplot(data = penguins)` creates an empty graph, but it’s not very interesting so I’m not going to show it here:
+
+```{r, eval=FALSE}
+ggplot(data=penguins)
+```
+
+You complete your graph by adding one or more layers to `ggplot()` with the addition operator `+`. The function `geom_point()` adds a layer of points to your plot, which creates a scatterplot. `ggplot2` comes with many geom functions that each add a different type of layer to a plot. We’ll learn a whole bunch of them throughout this lesson
+
+Each geom function in `ggplot2` takes a mapping argument. The visual properties in the plot are mapped onto your dataset using the aesthetics mapping function `aes()` inside of the geom function. That's a fancy way of saying you use aes() to choose which variable in the data you want to be plotted along the x axis, and which you want to be plotted along the y axis. 
+
+Let's use `ggplot2` to visualize the relationship between penguin body mass and penguin flipper length. By the way, I forget the names of my variables almost instantly after I look at the data. Maybe my brain is broken or something. So before I do anything, I always take a peek at my data to remind myself of the variable names and types. I usually use head() or summary(), but glimpse() is another function for peeking at your data that comes in the tidyverse:
+
+```{r}
+glimpse(penguins)
+```
+
+Now that I remember my variable names, let's build our scatterplot:
+
+```{r}
+ggplot(penguins) + 
+  geom_point(aes(x=flipper_length_mm, y=body_mass_g))
+```
+
+Great! So as penguin mass goes up, so does the flipper length. Seems reasonable to me. We also got a helpful warning that 2 values were missing. That's probably because we have `NA`s in our data. We can easily check that by printing out a summary of our data:
+
+```{r}
+summary(penguins)
+```
+
+Or, if we wanted to check it more explicitly, we could count the `NA`s using `dplyr` like this:
+
+```{r}
+penguins %>%
+  filter(is.na(body_mass_g)) %>% # Keep only values that are NA
+  summarize(n_na = n())  # Count the NAs
+```
+
+Well the default strategy in `ggplot2` is to warn me that there are `NA`s, but plot my data anyways and just leave out the observations that are missing. That works for me. 
+
+I wonder how the mass / flipper length relationship plays out for the three different penguin species? We can easily visualize this by making the same plot, but mapping the `color` aesthetic to species:
+
+```{r}
+ggplot(penguins) + 
+  geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species))
+```
+
+Ok, so the mass vs. flipper length relationship looks pretty similar across all three species, but Gentoo penguins are bigger than Adelie and Chinstrap. That's a handy little color legend that `ggplot` made for us automatically. We'll learn how to customize that later. 
+
+Let's make the same plot, but customize the x- and y-axis labels, and add a title to the plot. We can do this by adding more layers to our ggplot() call:
+
+```{r}
+ggplot(penguins) + 
+  geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species)) + 
+  xlab("Flipper length (mm)") +
+  ylab("Body mass (g)") +
+  ggtitle("Penguins are cute")
+```
+
+Not bad!
+
+### Histogram
+
+I don't really know that much about penguins. For example, how long is a penguin beak? Like a couple of centimeters? Let's plot a quick histogram and get a sense of the data:
+
+```{r}
+ggplot(penguins) + 
+  geom_histogram(aes(x=flipper_length_mm))
+```
+
+Well that histogram probably has 2 peaks because the 2 smaller species are on the left and those big Gentoos are on the right. I'm just going to quickly filter the data right in the plot call to look at just the Gentoo penguin flipper length histogram:
+
+```{r}
+ggplot(penguins %>% filter(species=="Gentoo")) + 
+  geom_histogram(aes(x=flipper_length_mm))
+```
+
+As I expected, that looks a bit more normal. 
+
+I also could have colored the histogram bars by species. If I used the `color` aesthetic, that would just outline the feature with color. Instead, I'll use the `fill` aesthetic to fill the bars in with color. Also, instead of just going with the default fill colors, I'm going to add another layer `scale_fill_manual` to specify the exact colors I want to use: 
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm)) +
+  geom_histogram(aes(fill = species), alpha = 0.5, position = "identity") +
+  scale_fill_manual(values = c("darkorange","darkorchid","cyan4"))
+```
+
+Now that's pretty. If you want a list of the named colors in R, you can use the function colors():
+
+```{r}
+colors()
+```
+
+
+
+### bar charts

@@ -1,0 +1,11 @@
+---
+title: "3_stats"
+author: "MSCI 599"
+output: html_document
+---
+
+t-test difference in body mass btwn Gentoo and Adelie, Gentoo and chinstrap, and chinstrap and adelie
+
+correlations between metrics - test one then show a correlation matrix plot
+
+anova

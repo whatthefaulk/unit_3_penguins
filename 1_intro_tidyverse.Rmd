@@ -1,7 +1,0 @@
----
-title: "Intro_Tidyverse"
-author: "MSCI 599"
-output: html_document
----
-
-
