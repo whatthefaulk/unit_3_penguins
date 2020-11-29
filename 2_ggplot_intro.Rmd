@@ -8,6 +8,8 @@ output: html_document
 
 Now we will learn how to visualise your data using `ggplot2.` R has several systems for making graphs, but `ggplot2` is one of the most elegant and most versatile. You can do more faster by learning one system and applying it to many different types of figures. Once you have gone through the basics, it can be helpful to look at a ggplot cheat sheet to remind yourself about functionality and syntax or to learn more. To download a cheat sheet, in RStudio, go to the toolbar at the top `Help -> Cheatsheets -> Data Visualization with ggplot2`. 
 
+![Art credit: Allison Horst](doc/ggplot_horst.jpeg){width=50%}
+
 To use `ggplot2`', we start by loading the `tidyverse.` Note again, that you could just load the package `ggplot2` and that would also give you access to all of the `ggplot2` functions. However, by loading the `tidyverse` we can get ggplot2 and dplyr loaded at the same time (as well as some other packages that data scientists frequently like to use). Let's also load up our Antarctic penguins dataset:
 
 ```{r}
