@@ -4,6 +4,11 @@ author: "MSCI 599"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+```
+
 ### ggplot2: visualizing data in the tidyverse
 
 Now we will learn how to visualise your data using `ggplot2.` R has several systems for making graphs, but `ggplot2` is one of the most elegant and most versatile. You can do more faster by learning one system and applying it to many different types of figures. Once you have gone through the basics, it can be helpful to look at a ggplot cheat sheet to remind yourself about functionality and syntax or to learn more. To download a cheat sheet, in RStudio, go to the toolbar at the top `Help -> Cheatsheets -> Data Visualization with ggplot2`. 
@@ -61,7 +66,7 @@ glimpse(penguins)
 
 Now that I remember my variable names, let's build our scatterplot:
 
-```{r}
+```{r, warning=TRUE}
 ggplot(penguins) + 
   geom_point(aes(x=flipper_length_mm, y=body_mass_g))
 ```
@@ -89,9 +94,17 @@ ggplot(penguins) +
   geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species))
 ```
 
-Ok, so the mass vs. flipper length relationship looks pretty similar across all three species, but Gentoo penguins are bigger than Adelie and Chinstrap. That's a handy little color legend that `ggplot` made for us automatically. We'll learn how to customize that later. 
+Ok, so the mass vs. flipper length relationship looks pretty similar across all three species, but Gentoo penguins are bigger than Adelie and Chinstrap. That's a handy little color legend that `ggplot` made for us automatically, but every part of the legend can be customized if you need it to be. 
 
-Let's make the same plot, but customize the x- and y-axis labels, and add a title to the plot. We can do this by adding more layers to our ggplot() call:
+That's a nice relationship between flipper length and size, where heavy birds have longer flippers. We'll learn how to run stats and models to explicitly examine the relationship between variables at a later time. However, we can use `geom_smooth()` to add in a simple smoother line to help guide our eye to see the relationship between these two variables. We'll do this by adding `geom_smooth()` as just another layer to our `ggplot`:
+
+```{r}
+ggplot(penguins) + 
+  geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species)) +
+  geom_smooth(aes(x=flipper_length_mm, y=body_mass_g))
+```
+
+Now let's make the same scatterplot, but customize the x- and y-axis labels, and add a title to the plot. We can do this by adding more layers to our ggplot() call:
 
 ```{r}
 ggplot(penguins) + 
@@ -112,24 +125,38 @@ ggplot(penguins) +
   geom_histogram(aes(x=flipper_length_mm))
 ```
 
-Well that histogram probably has 2 peaks because the 2 smaller species are on the left and those big Gentoos are on the right. I'm just going to quickly filter the data right in the plot call to look at just the Gentoo penguin flipper length histogram:
+`ggplot` got grumpy and sent me a message that they set a default number of 30 bins for my histogram, but it would be a better practice to pick a `binwidth.` So I'll plot a histogram again, but this time, I'll set `binwidth=5` so that flippers within 5mm are put into the same histogram bin. 
+
+Also, our histogram probably has 2 peaks because the 2 smaller species are on the left and those big Gentoos are on the right. I'm just going to quickly filter the data right in the plot call to look at just the Gentoo penguin flipper length histogram:
 
 ```{r}
 ggplot(penguins %>% filter(species=="Gentoo")) + 
-  geom_histogram(aes(x=flipper_length_mm))
+  geom_histogram(aes(x=flipper_length_mm), binwidth=5)
 ```
 
 As I expected, that looks a bit more normal. 
 
-I also could have colored the histogram bars by species. If I used the `color` aesthetic, that would just outline the feature with color. Instead, I'll use the `fill` aesthetic to fill the bars in with color. By specifying `alpha = 0.5` in my `geom_histogram` fucntion, I am asking the bar colors to be somewhat transparent, that way I can see if multiple colors are overlapping. Also, instead of just going with the default fill colors, I'm going to add another layer `scale_fill_manual` to specify the exact colors I want to use: 
+I also could have colored the histogram bars by species. If I used the `color` aesthetic, that would just outline the feature with color. Instead, I'll use the `fill` aesthetic to fill the bars in with color. Since I am interested in seeing flipper length histograms for all three species, I'm also going to change the bin positions from "stack" (the default) to "identity" so that bins for each species can overlap each other. By specifying `alpha = 0.5` in my `geom_histogram` function, I am asking the bar colors to be somewhat transparent, that way I can see if multiple colors are overlapping. Finally, instead of just going with the default fill colors, I'm going to add another layer `scale_fill_manual` to specify the exact colors I want to use. 
 
 ```{r}
-ggplot(data = penguins, aes(x = flipper_length_mm)) +
-  geom_histogram(aes(fill = species), alpha = 0.5, position = "identity") +
+ggplot(data = penguins) +
+  geom_histogram(aes(x = flipper_length_mm, fill = species), alpha = 0.5, binwidth=5, position="identity") +
   scale_fill_manual(values = c("darkorange","darkorchid","cyan4"))
 ```
 
-Now that's pretty. See below for a bit more information on R color options. 
+Now it's pretty clear to see that the data represent three normal-ish distributions of flipper length, accounting for the three different species. 
+
+### Box plots and jittered points
+
+Perhaps a more intuitive way to look at the spread of flipper length data between the three species is with boxplots. We can use `geom_boxplot()` to make simple boxplots which compactly display the distribution of a continuous variable. It visualises five summary statistics (the median, two hinges and two whiskers), and all "outlying" points individually. The lower and upper hinges correspond to the first and third quartiles (the 25th and 75th percentiles). The whiskers extend from the hinge to the largest value no further than 1.5 * IQR from the hinge (where IQR is the inter-quartile range, or distance between the first and third quartiles). 
+
+Personally, I like the combination of seeing the summary statistics of a boxplot along with the actual data plotted on top. To add the flipper length observations to our boxplots, we can use `geom_jitter()`, which plots the data with a jitter (random incremental change in position) so that you can easily see points that may have fallen right on top of each other. 
+
+```{r}
+ggplot(penguins) + 
+  geom_boxplot(aes(y = flipper_length_mm, x = species)) +
+  geom_jitter(aes(y = flipper_length_mm, x = species, color = species), width = 0.2) 
+```
 
 ### bar charts
 
@@ -193,9 +220,28 @@ https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pd
 
 ### Customizing aesthetics
 
-I used the `scale_fill_manual()` function earlier so that I could choose the exact colors that I wanted to fill in the bars of my histogram. There is a lot of functionality in this type of function (check the documentation). If you are asking yourself, "Can I change something very specific about how this figure looks?", chances are, you can. In fact, there is a whole suite of functions in ggplot that start with "scale_" followed by an aesthetic (x, y, color, fill, etc.) that you are trying to customize. Check out the `ggplot` cheat sheet to get a quick sense of the broad functionality.
+I used the `scale_fill_manual()` function earlier so that I could choose the exact colors that I wanted to fill in the bars of my histogram. There is a lot of functionality in this type of function (check the documentation). If you are asking yourself, "Can I change something very specific about how this figure looks?", chances are, you can. In fact, there is a whole suite of functions in ggplot that start with "scale_" followed by an aesthetic (x, y, color, fill, etc.) that you are trying to customize. Look at the `ggplot` cheat sheet to get a quick sense of the broad functionality.
 
 ### Themes
 
-Except for customizations specific to a single aesthetic (which you use "scale_"-type fucntions for), pretty much everything that you might want to customize about your plot is done through theme(). 
+You can customise the non-data elements of your plot with a theme. `ggplot2` includes eight themes by default (shown below), and many more are included in add-on packages like `ggthemes`.
+
+![](doc/visualization-themes.png){width=50%}
+
+For example, we can recreate our first scatterplot with the black and white theme:
+
+```{r}
+ggplot(penguins) + 
+  geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species)) +
+  theme_bw()
+```
+
+It’s also possible to control individual components of each theme, like the size and colour of the font used for the y axis.
+
+### For more information
+
+The best place to learn more is the ggplot2 book: [ggplot2: Elegant graphics for data analysis](https://www.amazon.com/dp/331924275X/ref=cm_sw_su_dp). It goes into much more depth about the underlying theory, and has many more examples of how to combine the individual pieces to solve practical problems. Unfortunately, the book is not available online for free, although you can find the source code at https://github.com/hadley/ggplot2-book.
+
+Another great resource is the ggplot2 extensions gallery https://exts.ggplot2.tidyverse.org/gallery/. This site lists many of the packages that extend ggplot2 with new geoms and scales. It’s a great place to start if you’re trying to do something that seems hard with ggplot2.
+
 
