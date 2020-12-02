@@ -116,6 +116,22 @@ ggplot(penguins) +
 
 Not bad!
 
+### Line graph
+
+In this penguin dataset, data were only collected in 2007-2009, so there is a very short time series here. Still, I wonder how many penguins of each species were caught in each year. We can use dplyr to group our data set by year and species, then use summarize() with the n() function to count penguin observations within each group. Then it's as simple as plotting our new summary dataset as lines using geom_line(), much the same way we used geom_point() earlier:
+
+```{r}
+# Count number of observations per species per year
+penguin_ts = penguins %>%
+  group_by(species, year) %>%
+  summarize(n=n())
+
+ggplot(data=penguin_ts) +
+  geom_line(aes(x=year, y=n, color=species))
+```
+
+Okay, great. Although there are fewer Chinstrap observations compared to Adelie and Gentoo, variation in observations don't seem to change too dramatically over time for any of the three species. That should help us rule out gross changes in environmental conditions when we are trying to understand the distribution of our variables.
+
 ### Histogram
 
 I don't really know that much about penguins. For example, how long is a penguin beak? Like a couple of centimeters? Let's plot a quick histogram and get a sense of the data:
@@ -146,7 +162,7 @@ ggplot(data = penguins) +
 
 Now it's pretty clear to see that the data represent three normal-ish distributions of flipper length, accounting for the three different species. 
 
-### Box plots and jittered points
+### Box plots (and jittered points)
 
 Perhaps a more intuitive way to look at the spread of flipper length data between the three species is with boxplots. We can use `geom_boxplot()` to make simple boxplots which compactly display the distribution of a continuous variable. It visualises five summary statistics (the median, two hinges and two whiskers), and all "outlying" points individually. The lower and upper hinges correspond to the first and third quartiles (the 25th and 75th percentiles). The whiskers extend from the hinge to the largest value no further than 1.5 * IQR from the hinge (where IQR is the inter-quartile range, or distance between the first and third quartiles). 
 
@@ -158,7 +174,7 @@ ggplot(penguins) +
   geom_jitter(aes(y = flipper_length_mm, x = species, color = species), width = 0.2) 
 ```
 
-### bar charts
+### Bar charts
 
 Let's build a couple of bar charts using `geom_bar` to help us get to know our data better. We can visualize the number of observations of each sex for the three different species to determine whether male and female penguins were sampled evenly:
 

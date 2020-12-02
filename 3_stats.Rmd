@@ -9,3 +9,21 @@ t-test difference in body mass btwn Gentoo and Adelie, Gentoo and chinstrap, and
 correlations between metrics - test one then show a correlation matrix plot
 
 anova
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
+```
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+
+### Acknowledgments and more information
+
+Here is another fabulous (and free!) textbook that inpsired this lesson, and that can be used as a resource for more information:
+
+Statistical Inference via Data Science: A ModernDive into R and the Tidyverse!
+By: Chester Ismay and Albert Y. Kim
+https://moderndive.com/index.html
