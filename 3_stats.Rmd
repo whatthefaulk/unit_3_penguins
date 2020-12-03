@@ -20,6 +20,14 @@ library(palmerpenguins)
 ```
 
 
+```{r}
+penguins %>%
+  select(species, body_mass_g, ends_with("_mm")) %>%
+  GGally::ggpairs(aes(color = species)) +
+  scale_colour_manual(values = c("darkorange","purple","cyan4")) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4"))
+```
+
 ### Acknowledgments and more information
 
 Here is another fabulous (and free!) textbook that inpsired this lesson, and that can be used as a resource for more information:
