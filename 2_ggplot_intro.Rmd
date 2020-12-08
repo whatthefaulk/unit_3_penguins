@@ -26,10 +26,10 @@ library(palmerpenguins)
 
 It's worth noting the messages and warnings that you get when you load in a package. In this case, we see that we are actually loading a series of packages, and all of the package versions are listed. There is also a warning about conflicts. Conflicts occur in your function namespace when you have libraries loaded with functions that have the exact same name as functions in other libraries that you loaded, or in base R. For example, there is a `filter()` function in the R `stats` package (which is automatically loaded as part of base R). There is also a `filter()` function in `dplyr`, which we used in the previous lesson. This unfortunately creates some confusion because now you may not be sure which filter() function you are actually using.
 
-If two packages use the same function name, then the package loaded last will hide the function from earlier packages. This is called *masking*. When masking occurs and you're not sure which package you loaded last, you can just type the name of the function into the console as a command and read the output. The namespace associated with the function will indicate which package the function is coming from:
+If two packages use the same function name, then the package loaded last will hide the function from earlier packages. This is called *masking*. When masking occurs and you're not sure which package you loaded last, you can use the find() function to figure out which package the function you are using is pulled from. If multiple package names are returned, the first package returned in the vector will be the one that is used by default. 
 
 ```{r}
-filter
+find("filter")
 ```
 
 Let's say you actually wanted to use the `stats` package version of filter. You can specify exactly what namespace to use in front of the function like this:
