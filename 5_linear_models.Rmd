@@ -1,0 +1,30 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
+```
+
+### Unit 3: Penguins
+#### Lesson 5: Linear models
+#### Functions: lm()
+
+### Linear models
+
+Linear regression is one of the most commonly-used and easy-to-understand approaches to modeling. Linear regression involves a numerical outcome variable y and explanatory variable(s) x that are either numerical or categorical. We will start with simple (univariate) linear regression where y is modeled as a function of a single x variable.
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+
+head(penguins)
+
+lm_1 = lm(bill_depth_mm ~ bill_length_mm, data=penguins)
+lm_2 = lm(bill_depth_mm ~ bill_length_mm, data=penguins %>% filter(species=="Gentoo"))
+
+lm_1
+summary(lm_1)
+lm_2
+```
+

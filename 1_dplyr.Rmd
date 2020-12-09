@@ -70,14 +70,27 @@ Let's read in some data and try out one of these dplyr functions.
 We will look at a data set of penguin size measurements for three penguin species observed on three islands in the Palmer Archipelago, Antarctica. The data were collected from 2007 - 2009 by Dr. Kristen Gorman with the [Palmer Station Long Term Ecological Research Program](https://pal.lternet.edu/). In 2020, the data were bundled into a neat R package `palmerpenguins` by Allison Horst to use as an alternative to the famed `iris` dataset. In addition to being a fabulous data scientist, Allison (@allison_horst) is an amazing artist:
 ![](doc/lter_penguins_horst.png){width=50%}
 
-So let's load up the `palmerpenguins` library and look at the `penguins` data and use some of our favorite tools to get familiar with it:
+So let's load up the `palmerpenguins` library:
 
 ```{r}
 library(palmerpenguins)
+```
+
+If you want to get a peek at what's in this library, go over to the `Environment` pane (upper right) in RStudio. Look for the tab that says `Global Environment` and click on the down arrow. Select `package:palmerpenguins` and see what is in this library's environment. There are two datasets in the package called `penguins` and `penguins_raw`. We'll be working with `penguins` over the next few lessons. Let's use some of our favorite data exploration tools to get familiar with the dataset:
+
+```{r}
 head(penguins)
 summary(penguins)
 dim(penguins)
 ```
+
+The `dplyr` version of the `head()` function to take a look at the first few values of each variable is `glimpse()`:
+
+```{r}
+glimpse(penguins)
+```
+
+I like `head()` better because I like to see my data in column-format, since that's how I usually think about my data frames. You should use whichever function / format you like best. Just don't forget to always look at your data before you try to start an analysis!
 
 ### Using dplyr functions: filter()
 
