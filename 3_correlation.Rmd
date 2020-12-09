@@ -1,22 +1,15 @@
 ---
-title: "3_stats"
-author: "MSCI 599"
 output: html_document
 ---
-
-correlations between metrics - test one then show a correlation matrix plot
-
-anova
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
 ```
 
-```{r}
-library(tidyverse)
-library(palmerpenguins)
-library(GGally)  # ggpairs()
-```
+
+### Unit: Penguins
+#### Lesson: Correlation
+#### Functions: cor(), cor.test(), GGally::ggpairs()
 
 ### Correlation
 
@@ -31,6 +24,9 @@ Let's see how bill length and bill depth relate to each other. This is what thos
 We can start with a simple plot. For now, let's just look at our big Gentoo penguins:
 
 ```{r}
+library(tidyverse)
+library(palmerpenguins)
+
 gentoo = penguins %>% 
   filter(species=="Gentoo")
 
@@ -67,7 +63,7 @@ So for bill length vs. bill depth, Pearson's r = 0.64. That's a pretty solid cor
 
 ### Correlation matrix
 
-Let's say that we want to get a quick sense of how all of the variables relate to each other. Which penguin body measurements are most related? I can send multiple columns from our data.frame to cor() at once, and it will return a matrix with the correlations of each variable vs. all of the others:
+Let's say that we want to get a quick sense of how all of the variables relate to each other. Which penguin body measurements are most related? I can send multiple columns from our data.frame to `cor()` at once, and it will return a matrix with the correlations of each variable vs. all of the others:
 
 ```{r}
 head(gentoo) # Check which columns would be interesting to include in the correlation matrix
@@ -76,12 +72,13 @@ cor(gentoo[,3:6], use="complete.obs")
 
 Well everything looks related to me, but the strongest correlation is between body mass and bill depth. 
 
-If you want to add more pizazz and flair to your correlation analysis (who doesn't?) you can use ggpairs() in the GGally package. ggpairs() will plot x-y scatterplots between variable pairs on the lower left-hand side of the plot matrix and print out correlation coefficients on the upper right hand side of the matrix. The matrix diagonal shows the density plot for each single variable (a density plot is like a histogram, but with a line instead of bars). This let's you handle quick data visualization, normality tests and a correlation analysis in a one-stop-shop.
+If you want to add more pizazz and flair to your correlation analysis (who doesn't?) you can use `ggpairs()` in the `GGally` package. `ggpairs()` will plot x-y scatterplots between variable pairs on the lower left-hand side of the plot matrix and print out correlation coefficients on the upper right hand side of the matrix. The matrix diagonal shows the density plot for each single variable (a density plot is like a histogram, but with a line instead of bars). This let's you handle quick data visualization, normality tests and a correlation analysis in a one-stop-shop.
 
 ```{r, fig.height = 6, fig.width = 8, message=FALSE, warning=FALSE}
-library(GGally)
+library(GGally) # ggpairs()
+
 gentoo %>%
-  select(species, body_mass_g, ends_with("_mm")) %>%
+  select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g) %>%
   ggpairs()
 ```
 
@@ -89,15 +86,11 @@ If we wanted to be really fancy, we can run ggpairs() on the complete dataset ra
 
 ```{r, fig.height = 7, fig.width = 9, message=FALSE, warning=FALSE}
 penguins %>%
-  select(species, body_mass_g, ends_with("_mm")) %>%
+  select(species, body_mass_g, ends_with("_mm")) %>% # clever way to select variables with names that end in "_mm"
   GGally::ggpairs(aes(color = species))
-
-penguins %>%
-  select(species, body_mass_g, ends_with("_mm")) %>%
-  GGally::ggpairs(aes(color = species)) +
-  scale_colour_manual(values = c("darkorange","purple","cyan4")) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"))
 ```
+
+That's a lot of information in one place. Every correlation presented in this matrix is significant (R shows this with the number of asterisks next to the correlation coefficient). That's not a huge surprise - why wouldn't different measurements on a bird's body be correlated? It seems like the correlation between body metrics is typically higher in Gentoo penguins than either Chinstrap or Adelie penguins. There's also a few relationships where the correlation of the pooled data (i.e. all three species) is negative, but each of the species-specific correlations for the same relationship is positive. This seems to be true for the relationship between bill depth and any of the other three body measurements. That's interesting, and something we'll look out for in our future statistical analyses of this dataset. 
 
 ### Acknowledgments and more information
 
