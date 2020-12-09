@@ -1,5 +1,5 @@
 ---
-title: "3_stats"
+title: "3_t-tests"
 author: "MSCI 599"
 output: html_document
 ---
