@@ -1,6 +1,9 @@
 # HW answer files
 HW*_ANSWERS*
 
+# .html files (knit from .Rmd) for now
+.html
+
 # History files
 .Rhistory
 .Rapp.history
