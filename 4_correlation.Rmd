@@ -6,7 +6,6 @@ output: html_document
 knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
 ```
 
-
 ### Unit 3: Penguins
 #### Lesson 4: Correlation
 #### Functions: cor(), cor.test(), GGally::ggpairs()
@@ -91,6 +90,14 @@ penguins %>%
 ```
 
 That's a lot of information in one place. Every correlation presented in this matrix is significant (R shows this with the number of asterisks next to the correlation coefficient). That's not a huge surprise - why wouldn't different measurements on a bird's body be correlated? It seems like the correlation between body metrics is typically higher in Gentoo penguins than either Chinstrap or Adelie penguins. There's also a few relationships where the correlation of the pooled data (i.e. all three species) is negative, but each of the species-specific correlations for the same relationship is positive. This seems to be true for the relationship between bill depth and any of the other three body measurements. That's interesting, and something we'll look out for in our future statistical analyses of this dataset. 
+
+### The golden rule: Correlation does not imply causation
+
+Correlation doesn’t imply causation. In other words, if two variables have high correlation, it does not mean one variable ’causes’ the value of the other variable to increase. Correlation is only an aid to understand the relationship. For example:
+
+![Credit: http://www.tylervigen.com/spurious-correlations](doc/spurious_correlation.png)
+
+It's tempting to try to figure out a mechanism though, isn't it?
 
 ### Acknowledgments and more information
 

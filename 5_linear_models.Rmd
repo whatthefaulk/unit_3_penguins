@@ -10,21 +10,98 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618)
 #### Lesson 5: Linear models
 #### Functions: lm()
 
-### Linear models
+### Linear regression
 
 Linear regression is one of the most commonly-used and easy-to-understand approaches to modeling. Linear regression involves a numerical outcome variable y and explanatory variable(s) x that are either numerical or categorical. We will start with simple (univariate) linear regression where y is modeled as a function of a single x variable.
 
-```{r}
+The mathematical equation for simple regression is as follows:
+$$y = \beta_1 + \beta_2*x + \varepsilon$$
+where $\beta_1$ is the y-intercept, $\beta_2$ is the slope and $\varepsilon$ is the error term, or the portion of y that the regression model can't explain. 
+
+### Exploratory data analysis
+
+Before we start modelling, we should never forget our exploratory data analysis! Sure, at this point you probably feel pretty confident about the penguins data, but we'll check it out again to build good habits. Linear regression has 5 key assumptions:
+
+-  Linear relationship 
+-  Multivariate normality
+-  No or little multicollinearity
+-  No auto-correlation (samples are independent)
+-  Homoscedasticity (variance is equal along the regression line)
+
+Additionally, a good sample size rule of thumb is that the regression analysis requires at least 20 cases per independent variable in the analysis.
+
+Here are some plots you want to look at before building a linear regression model:
+
+-  Scatter plot: Visualise the linear relationship between the predictor and response, check for auto-correlation (if needed) and heteroscedasticity
+-  Box plot: To spot any outlier observations in the variable. Having outliers in your predictor can drastically affect the predictions as they can affect the direction/slope of the line of best fit.
+-  Histogram / density plot: To see the distribution of the predictor variable. Ideally, a close to normal distribution (a bell shaped curve), without being skewed to the left or right is preferred.
+-  Q-Q plot: Also good for checking normality of your predictor variable
+-  Correlation matrix (like `GGally::ggpairs()`) to check for multicollinearity in your explanatory variables
+
+If you do encounter some problems with your data, there are many solutions that can help make linear regression an appropriate analysis. For example, if your explanatory variables aren't normal or you have heterscedasticity, a nonlinear transformation (such as $log(x)$, $x^2$ or $\sqrt{x}$) may solve the issue. If you have some nasty outliers, think about whether you might be (scientifically) justified in removing them from the dataset. If you several of your explanatory variables are correlated, you can remove some of them using stepwise regression. These will be covered in detail in a statistics class.
+
+### Simple linear regression
+
+Let's use the `palmerpenguins` data to look again at the relationship between bill length and bill depth. I'll do a little exploratory data analysis by viewing the first few data points with `head()`, then I'll look at the density plots and correlation with `GGally::ggpairs()`
+
+```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(palmerpenguins)
+library(GGally)
 
-head(penguins)
+glimpse(penguins)
+penguins %>% 
+  select(bill_depth_mm, bill_length_mm) %>%
+  GGally::ggpairs()
+```
 
+The linearity of the explanatory variable `bill_depth_mm` and the independent variable `bill_depth_mm` doesn't look very promising to me. Let's see what happens if we actually build the linear regression. We'll use the function `lm()` which stands for "linear model" and we'll indicate the relationship we want to test by putting a formula of the format `y~x` as a parameter. We'll save the model results in a variable, then use the `summary()` function to display the model results: 
+
+```{r}
 lm_1 = lm(bill_depth_mm ~ bill_length_mm, data=penguins)
+summary(lm_1)
+```
+
+Both coefficients $\beta_1$ (the y-intercept) and $\beta_2$ (the slope associated with bill length) are statistically significant with $p<0.05$. 
+
+If you are interested in checking some of the assumptions of your linear model *post hoc*, you can send your saved model to the plot() function in base R:
+
+```{r}
+class(lm_1)
+typeof(lm_1)
+plot(lm_1) 
+```
+
+You can learn more about this quick-and-dirty diagnostics plotting trick by looking up the help page `?plot.lm`. The function `plot.lm()` is the version of the `plot()` function that is called when the parameter that you pass `plot()` is of the class "lm". This output provides you four useful plots:
+
+-  Residuals vs Fitted Values, to check constant variance in residuals and linearity of association between predictors and outcome (look for a relatively straight line and random-looking scatterplot).
+-  Normal Q-Q Plot, to check the assumption of normally distributed residuals.
+-  Root of Standardized residuals vs Fitted values, this is very similar to number 1, where the Y axis of residuals is in a different metric (notice cases 4, 18, and 38 are labelled again, just like our first figure).
+-  Residuals vs Leverage, to check if the leverage of certain observations are driving abnormal residual distributions, thus violating assumptions and biasing statistical tests. Potentially problematic points will be labelled in the plot.
+
+Another quick-and-dirty set of diagnostics is `glvlma()` in the `gvlma` package. 
+
+
+
+
+This implies that as bill length increases, bill depth decreases. That doesn't really make sense, right? What did we do wrong?
+
+Well, grouping all of the penguin data, i.e. all three species, is pretty illogical. In fact, it violates another, less cited, assumption of linear regression: "All necessary independent variables are included in the regression that are specified by existing theory and/or research." We probably should have included species, or separated our analysis out into three separate models, one for each species. 
+
+```{r}
 lm_2 = lm(bill_depth_mm ~ bill_length_mm, data=penguins %>% filter(species=="Gentoo"))
 
 lm_1
 summary(lm_1)
 lm_2
+```
+
+
+Including species:
+
+```{r}
+lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins)
+summary(lm_3)
+
 ```
 
