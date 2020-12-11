@@ -64,44 +64,56 @@ summary(lm_1)
 
 Both coefficients $\beta_1$ (the y-intercept) and $\beta_2$ (the slope associated with bill length) are statistically significant with $p<0.05$. 
 
-If you are interested in checking some of the assumptions of your linear model *post hoc*, you can send your saved model to the plot() function in base R:
-
-```{r}
-class(lm_1)
-typeof(lm_1)
-plot(lm_1) 
-```
-
-You can learn more about this quick-and-dirty diagnostics plotting trick by looking up the help page `?plot.lm`. The function `plot.lm()` is the version of the `plot()` function that is called when the parameter that you pass `plot()` is of the class "lm". This output provides you four useful plots:
-
--  Residuals vs Fitted Values, to check constant variance in residuals and linearity of association between predictors and outcome (look for a relatively straight line and random-looking scatterplot).
--  Normal Q-Q Plot, to check the assumption of normally distributed residuals.
--  Root of Standardized residuals vs Fitted values, this is very similar to number 1, where the Y axis of residuals is in a different metric (notice cases 4, 18, and 38 are labelled again, just like our first figure).
--  Residuals vs Leverage, to check if the leverage of certain observations are driving abnormal residual distributions, thus violating assumptions and biasing statistical tests. Potentially problematic points will be labelled in the plot.
-
-Another quick-and-dirty set of diagnostics is `glvlma()` in the `gvlma` package. 
-
-
-
-
 This implies that as bill length increases, bill depth decreases. That doesn't really make sense, right? What did we do wrong?
 
 Well, grouping all of the penguin data, i.e. all three species, is pretty illogical. In fact, it violates another, less cited, assumption of linear regression: "All necessary independent variables are included in the regression that are specified by existing theory and/or research." We probably should have included species, or separated our analysis out into three separate models, one for each species. 
 
-```{r}
-lm_2 = lm(bill_depth_mm ~ bill_length_mm, data=penguins %>% filter(species=="Gentoo"))
+If you are interested in checking some of the assumptions of your linear model *post hoc*, you can send your saved model to the plot() function in base R:
 
-lm_1
-summary(lm_1)
-lm_2
+```{r}
+class(lm_1) # Note that your model output is a variable of the class "lm"
+plot(lm_1)  # This actually calls plot.lm() since the first parameter is class "lm"
 ```
 
+You can learn more about this quick-and-dirty diagnostics plotting trick by looking up the help page `?plot.lm`. The function `plot.lm()` is the version of the `plot()` function that is called when the parameter that you pass `plot()` is of the class "lm". This output provides you four useful plots:
+
+-  Residuals vs Fitted Values, to check constant variance in residuals and linearity of association between predictors and outcome (look for a relatively straight line and random-looking scatterplot). By default, the 3 points with the highest residuals are labeled (i.e. the row number is printed on the figure).
+-  Normal Q-Q Plot, to check the assumption of normally distributed residuals.
+-  Root of Standardized residuals vs Fitted values, this is very similar to number 1, where the Y axis of residuals is in a different metric.
+-  Residuals vs Leverage, to check if the leverage of certain observations are driving abnormal residual distributions, thus violating assumptions and biasing statistical tests. 
+
+There are many objective statistical tests that can be performed to check the assumptions of your data. For more resources, look at the end of this tutorial page.
+
+### Another simple linear model
+
+Let's do the logical thing and test the same relationship `bill_depth_mm ~ bill_length_mm` but only looking at one species. 
+
+```{r}
+head(penguins)
+lm_2 = lm(bill_depth_mm ~ bill_length_mm, data=penguins %>% filter(species=="Gentoo"))
+summary(lm_2)
+gvlma(lm_2)
+plot(lm_2)
+```
+
+
+### Multiple linear regression
 
 Including species:
 
 ```{r}
 lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins)
+lm_4 = lm(bill_depth_mm ~ bill_length_mm + species + sex, data=penguins)
 summary(lm_3)
-
+AIC(lm_1, lm_3, lm_4)
 ```
+
+### More information
+
+Overview of basic regression capabilities in R:
+https://www.statmethods.net/stats/regression.html
+
+Diagnostic tests for linear regression:
+https://www.statmethods.net/stats/rdiagnostics.html
+https://www.ianruginski.com/post/regressionassumptions/
 
