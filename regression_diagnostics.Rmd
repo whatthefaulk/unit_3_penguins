@@ -1,0 +1,68 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
+```
+
+### Unit 3: Penguins
+### Regression Diagnostics
+
+Let's run through the formal tests that can be used for linear regression diagnostics. We'll do this with the penguins data using the linear model:
+
+```{r, eval=FALSE}
+bill_depth_mm ~ bill_length_mm
+```
+
+We'll compare a bad example of this model where we run this model with all penguin data (3 species, both sexes) vs. a good example of the model run with just one species and sex.
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+
+lm_bad = lm(bill_depth_mm ~ bill_length_mm, data=penguins)
+summary(lm_bad)
+
+lm_good = lm(bill_depth_mm ~ bill_length_mm, data=penguins %>% filter(species=="Gentoo", sex=="male"))
+summary(lm_good)
+
+dim(penguins %>% filter(species=="Gentoo", sex=="female"))
+```
+
+### Diagnostics
+
+```{r}
+plot(lm_bad)
+```
+
+These four plots are important diagnostic tools in assessing whether the linear model is appropriate. The first two plots are the most important, but the last two can also help with identifying outliers and non-linearities.
+
+Residuals vs. Fitted When a linear model is appropriate, we expect
+
+the residuals will have constant variance when plotted against fitted values; and
+
+the residuals and fitted values will be uncorrelated.
+
+If there are clear trends in the residual plot, or the plot looks like a funnel, these are clear indicators that the given linear model is inappropriate.
+
+Normal QQ plot You can use a linear model for prediction even if the underlying normality assumptions don’t hold. However, in order for the p-values to be believable, the residuals from the regression must look approximately normally distributed.
+
+Scale-location plot This is another version of the residuals vs fitted plot. There should be no discernible trends in this plot.
+
+Residuals vs Leverage. Leverage is a measure of how much an observation influenced the model fit. It’s a one-number summary of how different the model fit would be if the given observation was excluded, compared to the model fit where the observation is included. Points with high residual (poorly described by the model) and high leverage (high influence on model fit) are outliers. They’re skewing the model fit away from the rest of the data, and don’t really seem to fit with the rest of the data.
+
+```{r}
+library(gvlma)
+
+gvlma(lm_good)
+```
+
+
+
+
+
+
+
+
+

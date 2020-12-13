@@ -3,12 +3,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE) 
 ```
 
 ### Unit 3: Penguins
 #### Lesson 5: Linear models
-#### Functions: lm()
+#### New functions: lm(), geom_smooth(), ( predict(), AIC(), step(), ...?)
 
 ### Linear regression
 
@@ -62,9 +62,15 @@ lm_1 = lm(bill_depth_mm ~ bill_length_mm, data=penguins)
 summary(lm_1)
 ```
 
-Both coefficients $\beta_1$ (the y-intercept) and $\beta_2$ (the slope associated with bill length) are statistically significant with $p<0.05$. 
+Both coefficients $\beta_1$ (the y-intercept) and $\beta_2$ (the slope associated with bill length) are statistically significant with $p<0.05$. However, the R-squared = 0.05, which means that bill length only explains about 5% of the variance in the bill depth observations. That's pretty pathetic. Since this is just a simple univariate regression model we can quickly plot the data and the linear model using `geom_smooth()` with `method="lm"` in `ggplot.` 
 
-This implies that as bill length increases, bill depth decreases. That doesn't really make sense, right? What did we do wrong?
+```{r}
+ggplot(data=penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+     geom_point() +
+     geom_smooth(method = "lm")
+```
+
+There are clear clusters in the data that are being ignored by our regression model, and the line doesn't seem to capture any interesting trend. The negative coefficient for bill_length_mm (as well as the plotted model) indicates that as bill length increases, bill depth decreases. That doesn't really make sense, right? What did we do wrong?
 
 Well, grouping all of the penguin data, i.e. all three species, is pretty illogical. In fact, it violates another, less cited, assumption of linear regression: "All necessary independent variables are included in the regression that are specified by existing theory and/or research." We probably should have included species, or separated our analysis out into three separate models, one for each species. 
 
@@ -86,27 +92,53 @@ There are many objective statistical tests that can be performed to check the as
 
 ### Another simple linear model
 
-Let's do the logical thing and test the same relationship `bill_depth_mm ~ bill_length_mm` but only looking at one species. 
+Let's do the logical thing and test the same relationship `bill_depth_mm ~ bill_length_mm` but only looking at one species:
 
 ```{r}
-head(penguins)
-lm_2 = lm(bill_depth_mm ~ bill_length_mm, data=penguins %>% filter(species=="Gentoo"))
+gentoo = penguins %>% filter(species=="Gentoo")
+lm_2 = lm(bill_depth_mm ~ bill_length_mm, data=gentoo)
 summary(lm_2)
-gvlma(lm_2)
-plot(lm_2)
+ggplot(data=gentoo, aes(x = bill_length_mm, y = bill_depth_mm)) +
+     geom_point() +
+     geom_smooth(method = "lm")
 ```
 
+This trend looks a little better to me. The R-squared = 0.41, so the model explains about 41% of the variation. That's pretty impressive considering we only have one variable in there. Also, the model passes the sanity check because it seems logical that bill depth will increase with increasing bill length. 
+
+We can actually use geom_smooth() to examine separate linear models for each of the three penguin species at once without formally running the regression:
+
+```{r}
+ggplot(data=penguins, aes(x=bill_length_mm, y=bill_depth_mm, color=species)) +
+     geom_point() +
+     geom_smooth(method = "lm")
+```
+
+So that makes it very clear that running all three species together was a serious logical error, and it produced a completely untrue result that bill depth increases as bill length decreases In fact, when we split the three species apart, we can see that bill depth increases with increasing bill length (as you'd expect) and the relationships look pretty similar for each species. This is an example of Simpson's paradox, which occurs when trends that appear when a dataset is separated into groups reverse when the data are aggregated. Basically, when doing statistics, you want to use your brain and your gut to build models that make sense.
 
 ### Multiple linear regression
 
 Including species:
 
 ```{r}
+library(ggiraph)
+library(ggiraphExtra)
+
 lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins)
 lm_4 = lm(bill_depth_mm ~ bill_length_mm + species + sex, data=penguins)
 summary(lm_3)
 AIC(lm_1, lm_3, lm_4)
+
+# https://cran.r-project.org/web/packages/ggiraphExtra/vignettes/ggPredict.html
+ggPredict(lm_3, se=TRUE, interactive=TRUE)
 ```
+
+With predict():
+https://aosmith.rbind.io/2018/11/16/plot-fitted-lines/
+interval = confidence vs. interval = prediction
+
+with ggPredict():
+https://cran.r-project.org/web/packages/ggiraphExtra/vignettes/ggPredict.html
+
 
 ### More information
 
