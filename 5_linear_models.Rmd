@@ -10,6 +10,8 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE)
 #### Lesson 5: Linear models
 #### New functions: lm(), geom_smooth(), ( predict(), AIC(), step(), ...?)
 
+***
+
 ### Linear regression
 
 Linear regression is one of the most commonly-used and easy-to-understand approaches to modeling. Linear regression involves a numerical outcome variable y and explanatory variable(s) x that are either numerical or categorical. We will start with simple (univariate) linear regression where y is modeled as a function of a single x variable.
@@ -18,9 +20,9 @@ The mathematical equation for simple regression is as follows:
 $$y = \beta_1 + \beta_2*x + \varepsilon$$
 where $\beta_1$ is the y-intercept, $\beta_2$ is the slope and $\varepsilon$ is the error term, or the portion of y that the regression model can't explain. 
 
-### Exploratory data analysis
+### Model assumptions
 
-Before we start modelling, we should never forget our exploratory data analysis! Sure, at this point you probably feel pretty confident about the penguins data, but we'll check it out again to build good habits. Linear regression has 5 key assumptions:
+Linear regression has 5 key assumptions:
 
 -  Linear relationship 
 -  Multivariate normality
@@ -42,14 +44,16 @@ If you do encounter some problems with your data, there are many solutions that 
 
 ### Simple linear regression
 
-Let's use the `palmerpenguins` data to look again at the relationship between bill length and bill depth. I'll do a little exploratory data analysis by viewing the first few data points with `head()`, then I'll look at the density plots and correlation with `GGally::ggpairs()`
+Let's use the `palmerpenguins` data to look again at the relationship between bill length and bill depth. I'll do a little exploratory data analysis by viewing the first few data points and calculating summary statistics, then I'll look at the density plots and correlation with `GGally::ggpairs()`
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(palmerpenguins)
 library(GGally)
 
+# Exploratory data analysis:
 glimpse(penguins)
+summarize(penguins)
 penguins %>% 
   select(bill_depth_mm, bill_length_mm) %>%
   GGally::ggpairs()
@@ -74,7 +78,7 @@ There are clear clusters in the data that are being ignored by our regression mo
 
 Well, grouping all of the penguin data, i.e. all three species, is pretty illogical. In fact, it violates another, less cited, assumption of linear regression: "All necessary independent variables are included in the regression that are specified by existing theory and/or research." We probably should have included species, or separated our analysis out into three separate models, one for each species. 
 
-If you are interested in checking some of the assumptions of your linear model *post hoc*, you can send your saved model to the plot() function in base R:
+To check some of the assumptions of your linear model *post hoc*, you can send your saved model to the plot() function in base R:
 
 ```{r}
 class(lm_1) # Note that your model output is a variable of the class "lm"
@@ -117,19 +121,70 @@ So that makes it very clear that running all three species together was a seriou
 
 ### Multiple linear regression
 
-Including species:
+In life, we typically can't do a very good job explaining variation in some dependent variable using just a single independent variable. Multiple linear regression is when we build a function with multiple independent variables of the form:
+
+$$y = \beta_0 + \beta_1*x_1 + \beta_2*x_2 + ... + \varepsilon$$
+
+When conducting multiple linear regression, all of the same assumptions and diagnostics apply, with one important addition: the interpretation of the associated effect of any one explanatory variable must be made in conjunction with the other explanatory variables included in your model.
+
+#### A note on model goals:
+
+The statistical decisions you make should account for your end goals. These are the two types of goals when building a model:
+
+1. *Modeling for explanation:* When you want to explicitly describe and quantify the relationship between the outcome variable y and a set of explanatory variables x, determine the significance of any relationships, have measures summarizing these relationships, and possibly identify any causal relationships between the variables.
+2. *Modeling for prediction:* When you want to predict an outcome variable  y based on the information contained in a set of predictor variables x. Unlike modeling for explanation, however, you don’t care so much about understanding how all the variables relate and interact with one another, but rather only whether you can make good predictions about y using the information in x.
+
+In this lesson, and in general when you are trying to "play it safe" in your analyses, you will be modeling for explanation. This means if you are modeling some $y$ as a a function of $x_1$ and $x_2$, but $x_1$ and $x_2$ are quite collinear, then you won't be able to differentiate the unique impact of either $x$ variable on $y$ because, for example, $x_1$ may be stealing some of the variation from $x_2$. Then the total impact of $x_2$ on $y$ will be unfairly biased small, and the impact of $x_1$ will be unfairly biased large. Who knows what chaos will ensue when you use these biased models to guide science, policy, etc.?
+
+However, if you are modeling for prediction, and don't actually care what the relative impact of $x_1$ or $x_2$ is on $y$, but you want your $y$ predictions to be as accurate and precise as possible, then you don't have to worry about multicollinearity. For example, weather predictions are like this. Meteorologists just throw everything they can into their models, even though their "explanatory variables" can be highly correlated, becuase they aren't trying to demonstrate a relationship between rainfall and pressure, they are just trying to let you know whether it'll be a good weekend for a beach trip.
+
+#### Continuous vs. categorical variables:
+
+-  Continuous variable: numeric variables that can have an infinite number of values between any two values. Example: `bill_depth_mm`, `bill_length_mm`
+-  Categorical varialbe: (a.k.a. discrete or nominal variables) contain a finite number of categories or distinct groups. Example: `species`. These should typically be in the `factor` class in R.
+
+There are cases when you, the data scientist, can make a conscientious choice between assigning a variable as continuous vs. categorical. A good example is "year". If you are looking for a trend in your data over time, year should be treated as a continuous variable. If you are trying to account for some wacky conditions that can change from year to year, but that probably don't consitute a temporal trend, you could treat year as a categorical variable.
+
+#### One continuous and one categorical explanatory variable
+
+Our adventures in simple regression taught us that we shouldn't model bill depth as a function of bill length without accounting for species. We built three separate models, one for each species. Another option is to build one model, but include species as an explanatory variable:
+
+$$bill_depth_mm ~ bill_length_mm + species$$
+
+This is very simple to implement in the lm() function:
+```{r}
+lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins)
+summary(lm_3)
+```
+
+There are several different ways to access your model results. You can copy and paste coefficient estimates, p-values, etc. from the summary() output, or you can extract various elements from the model variable using specialized functions like coef(). The most efficient way to get at your model results makes use of the `broom` package in the tidyverse.  
+
+```{r}
+str(lm_3)
+coef(lm_3)
+anova(lm_3)
+broom::tidy(lm_3)
+broom::tidy(lm_3, conf.int = TRUE, conf.level = 0.95)
+
+```
+
+
 
 ```{r}
 library(ggiraph)
 library(ggiraphExtra)
+ggPredict(lm_3, se=TRUE, interactive=TRUE)
+```
 
-lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins)
-lm_4 = lm(bill_depth_mm ~ bill_length_mm + species + sex, data=penguins)
-summary(lm_3)
+Including species:
+
+```{r}
+
+lm_4 = lm(bill_depth_mm ~ bill_length_mm*species, data=penguins)
 AIC(lm_1, lm_3, lm_4)
 
 # https://cran.r-project.org/web/packages/ggiraphExtra/vignettes/ggPredict.html
-ggPredict(lm_3, se=TRUE, interactive=TRUE)
+ggPredict(lm_4, se=TRUE, interactive=TRUE) + main("hi")
 ```
 
 With predict():

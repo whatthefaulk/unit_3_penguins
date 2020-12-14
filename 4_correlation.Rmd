@@ -3,12 +3,14 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE) 
 ```
 
 ### Unit 3: Penguins
 #### Lesson 4: Correlation
 #### Functions: cor(), cor.test(), GGally::ggpairs()
+
+***
 
 ### Correlation
 
@@ -29,6 +31,9 @@ library(palmerpenguins)
 gentoo = penguins %>% 
   filter(species=="Gentoo")
 
+# Exploratory data analysis:
+glimpse(gentoo)
+summarize(gentoo)
 ggplot() +
   geom_point(aes(x=bill_length_mm, y=bill_depth_mm), data=gentoo)
 ```
