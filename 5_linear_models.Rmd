@@ -8,7 +8,7 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE)
 
 ### Unit 3: Penguins
 #### Lesson 5: Linear models
-#### New functions: lm(), geom_smooth(), ( predict(), AIC(), step(), ...?)
+#### New functions: lm(), geom_smooth(), geom_ribbon(), plot.lm(), coef(), anova(), broom::tidy(), predict(), ggPredict(), expand.grid()         (AIC(), step(), ...?)
 
 ***
 
@@ -147,34 +147,101 @@ There are cases when you, the data scientist, can make a conscientious choice be
 
 #### One continuous and one categorical explanatory variable
 
-Our adventures in simple regression taught us that we shouldn't model bill depth as a function of bill length without accounting for species. We built three separate models, one for each species. Another option is to build one model, but include species as an explanatory variable:
+Our adventures in simple regression taught us that we shouldn't model bill depth as a function of bill length without accounting for species. We built three separate models, one for each species. Another option is to build one model, but include species as an explanatory variable with the function.
 
-$$bill_depth_mm ~ bill_length_mm + species$$
+This is very simple to implement in the `lm()` function. We'll try a function of the form `bill_depth_mm ~ bill_length_mm + species`. This model will estimate a single slope associated with bill length and a different intercept for each species. The resulting prediction will look like three parallel lines, one for each species. 
 
-This is very simple to implement in the lm() function:
 ```{r}
-lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins)
-summary(lm_3)
+# Drop NA data before fitting model. This helps me avoid problems down the line with predict()
+penguins_lm_3 = penguins %>%
+  filter(!is.na(bill_depth_mm),
+         !is.na(bill_length_mm),
+         !is.na(species))
+lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins_lm_3)
 ```
 
-There are several different ways to access your model results. You can copy and paste coefficient estimates, p-values, etc. from the summary() output, or you can extract various elements from the model variable using specialized functions like coef(). The most efficient way to get at your model results makes use of the `broom` package in the tidyverse.  
+
+
+
+There are several different ways to access your model results. You can copy and paste coefficient estimates, p-values, etc. from the `summary()` output, or you can extract various elements from the model variable using specialized functions like `coef()`. If you want your results to look like an ANOVA table (remember, ANOVA and linear regression are mathematically equivalent), you can use the `anova()` function. Probably the most efficient way to get at your model results makes use of the `tidy()` function in the `broom` package in the tidyverse. This outputs the model results in a neat data frame, which you can easily export to a `.csv` file to save or create a table in your manuscript. Check the help page `?tidy.lm` and you can see that you can ask for confidence intervals to be output on your coefficients.
 
 ```{r}
-str(lm_3)
 coef(lm_3)
 anova(lm_3)
 broom::tidy(lm_3)
 broom::tidy(lm_3, conf.int = TRUE, conf.level = 0.95)
-
 ```
 
+Now let's plot the data, the linear model predictions and the standard errors on those predictions. Although it seems super similar, recall that the plot we made at the end of our simple linear regression section actually had the results of three distinct linear models plotted onto the same figure: one for each speices. This multiple regression model `lm_3` that we created is a single model with two explanatory variables, bill_length_mm and species. The slopes associated with each species must be equivalent in this model formulation. 
 
+The combined libraries ggiraph and ggiraphExtra have a really convenient plot function for examining a model called `ggPredict()`. You can set the parameters so that standard errors are printed around the model and you can also make the plot interactive. That means if you click on a point, a box will pop up with information on that datapoint:
 
 ```{r}
 library(ggiraph)
 library(ggiraphExtra)
 ggPredict(lm_3, se=TRUE, interactive=TRUE)
 ```
+
+While `ggPredict()` is a fabulous function, there is not a lot of room to customize it. The more formal and more customizable method for accessing your model predictions is using the `predict()` function. 
+
+```{r}
+lm_3_predictions = predict(lm_3, interval="confidence") # Calculates lm predictions for the original dataset
+head(lm_3_predictions)
+penguins_lm_3_predict = cbind(penguins_lm_3, lm_3_predictions)
+ggplot(penguins_lm_3_predict, aes(x = bill_length_mm, y = bill_depth_mm, color = species) ) +
+     geom_point() +
+     geom_ribbon( aes(ymin = lwr, ymax = upr, fill = species, color = NULL), alpha = .1) +
+     geom_line(aes(y = fit), size = 1) +
+     theme_bw()
+```
+
+
+The fitted lines in all the plots so far are different lengths. This is because we have slightly different ranges of bill length data for each species category in the dataset. By default when using `predict()` we get the fitted values; i.e., the predicted values from the dataset used in model fitting.
+
+I think having different line lengths is fine here, but there are times when we want to draw each line across the entire range of the variable in the dataset. Also, sometimes our data are so sparse that our fitted line ends up not being very smooth; this can be especially problematic for non-linear fits. In both of these situations we’d want to make a new dataset for making the predictions.
+
+Let’s make group lines using the entire range of bill length instead of the within-species range. We can make a variable with the full range of bill length via seq(), making a sequence from the minimum to maximum dataset value. I use 0.1 as the increment in seq(); the increment value you’ll want to use depends on the range of your variable. Then to get the full range of bill length associated with each species category we can use `expand.grid()` in base R:
+
+```{r}
+# Build a new bill_length_mm dataset that spans the full range of the original data at even intervals
+newdata_bill_length_mm = seq(min(penguins_lm_3$bill_length_mm), max(penguins_lm_3$bill_length_mm), by = .1)
+# Repeat complete bill_length_mm data for each species
+newdata = expand.grid(bill_length_mm = newdata_bill_length_mm, species = unique(penguins_lm_3$species) )
+head(newdata)
+```
+The key to making a dataset for prediction is that it must have every variable used in the model in it. You will get an error if you forget a variable or make a typo in one of the variable names. Note that the prediction dataset does not need to contain the response variable.
+
+We use this prediction dataset with the newdata argument in `predict()`. We can add the predicted values to the prediction dataset using `cbind()`. When we make the plot of the fitted lines now we can see that the line for each species covers the same range. There are now two datasets used in the plotting code: the original for the points and newdata for the predicted line and 95% confidence intervals"
+
+```{r}
+newdata_predict_lm_3 = cbind(newdata, predict(lm_3, interval="confidence", newdata = newdata))
+dim(newdata_predict_lm_3)
+ggplot() +
+     geom_point(data=penguins_lm_3_predict, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+     geom_ribbon(aes(ymin=lwr, ymax=upr, x = bill_length_mm, fill = species, color = NULL), alpha = .1, data=newdata_predict_lm_3) +
+     geom_line(aes(y = fit, x = bill_length_mm, color=species), size = 1, data=newdata_predict_lm_3) +
+     theme_bw()
+```
+
+
+```{r}
+library(broom)
+temp = lm_3 %>%
+augment(penguins_lm_3, se_fit=TRUE) %>%
+mutate(lwr = .fitted - 1.96 * .se.fit,
+upr = .fitted + 1.96 * .se.fit) %>%
+ggplot(aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+geom_point() +
+geom_ribbon(aes(
+ymin = lwr,
+ymax = upr,
+fill = species,
+color = NULL
+),
+alpha = .15) +
+geom_line( aes(y = .fitted), size = 1)
+```
+
 
 Including species:
 
@@ -184,7 +251,7 @@ lm_4 = lm(bill_depth_mm ~ bill_length_mm*species, data=penguins)
 AIC(lm_1, lm_3, lm_4)
 
 # https://cran.r-project.org/web/packages/ggiraphExtra/vignettes/ggPredict.html
-ggPredict(lm_4, se=TRUE, interactive=TRUE) + main("hi")
+ggPredict(lm_4, se=TRUE, interactive=TRUE)
 ```
 
 With predict():
