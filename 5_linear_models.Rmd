@@ -268,8 +268,11 @@ ggplot() +
   ggsave(filename = "figures/bill_depth_model.png", device = "png", width = 5, height = 3, units = "in", dpi = 300)
 ```
 
+#### Two continuous variables
 
+What if you were working with taxadermy penguins from a museum collection and could measure bill depth and bill length but needed to use those to predict body mass?
 
+VIF
 
 Including species:
 
