@@ -1,8 +1,19 @@
 ---
-title: "Tidyverse_intro"
-author: "MSCI 599"
 output: html_document
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE) 
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+```
+
+
+### Unit 3: Penguins
+#### Lesson 1: Intro to tidyverse (data manipulation)
+#### New functions: 
+install.packages(), library(), as.data.frame(), filter(), arrange(), select(), rename(), mutate(), summarize(), group_by(), ungroup(), distinct(), print(), unlist(), write_csv()
+
+***
 
 ### The Tidyverse
 

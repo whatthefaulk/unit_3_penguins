@@ -1,13 +1,19 @@
 ---
-title: "ggplot_intro"
-author: "MSCI 599"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618) 
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE) 
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 ```
+
+
+### Unit 3: Penguins
+#### Lesson 2: Intro to ggplot (data visualization)
+#### New functions: 
+find(), ggplot(), geom_point(), geom_smooth(), geom_line(), geom_histogram(), geom_boxplot(), geom_jitter(), geom_bar(), facet_wrap(), coord_flip(), scale_fill_manual(), xlab(), ylab(), ggtitle(), ggsave(), colors(), theme_bw()
+
+***
 
 ### ggplot2: visualizing data in the tidyverse
 
@@ -17,7 +23,7 @@ Now we will learn how to visualise your data using `ggplot2.` R has several syst
 
 To use `ggplot2`', we start by loading the `tidyverse.` Note again, that you could just load the package `ggplot2` and that would also give you access to all of the `ggplot2` functions. However, by loading the `tidyverse` we can get ggplot2 and dplyr loaded at the same time (as well as some other packages that data scientists frequently like to use). Let's also load up our Antarctic penguins dataset:
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(palmerpenguins)
 ```
