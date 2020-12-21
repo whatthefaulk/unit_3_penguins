@@ -1,0 +1,76 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE) 
+```
+### In-class exercises
+### Unit 3: Penguins
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+library(gvlma) # gvlma()
+library(car)  # vif()
+```
+
+
+### Exercise 5.1
+
+Build a model predicting Gentoo bill length as a function of flipper length. Plot the predictions. Which explanatory variable (bill length vs. flipper length) does a better job of predicting bill depth? What is your evidence?
+
+```{r}
+gentoo = penguins %>% filter(species=="Gentoo")
+
+lm_bill_length = lm(bill_depth_mm ~ bill_length_mm, data=gentoo)
+summary(lm_bill_length)
+
+lm_flip = lm(bill_depth_mm ~ flipper_length_mm, data=gentoo)
+summary(lm_flip)
+
+ggplot(data=gentoo, aes(x = flipper_length_mm, y = bill_depth_mm)) +
+     geom_point() +
+     geom_smooth(method = "lm")
+```
+
+The Adjusted $R^2$ is higher in the flipper model than in the bill length model, so flipper length does a better job of predicting bill depth for Gentoo penguins.
+
+### Exercise 5.2
+
+Build a linear regression to predict the bill depth of Gentoo penguins as a function of 2 explanatory continuous variables: bill length and flipper length. Do some exploratory data analysis and check model diagnostics. Use the function `vif()` to make sure that you don't have a problem with multicollinearity. Then use the function `AIC()` to compare the Akaike Information Criterion between this model and a simple linear regression we built before with bill depth as a function of just bill length. Use the help pages or the tutorial on regression diagnostics in this unit to make sure you are using `vif()` and `AIC()` correctly. What are your findings? Plot the data, the model predictions and the 95% confidence intervals or the standard errors.
+
+####3!!!!!!!!!!!1######### Work on how we'll plot the predictions for 2 continuous variables
+
+```{r}
+# Drop NA data before fitting model. This helps me avoid problems down the line with predict()
+gentoo = penguins %>%
+  filter(!is.na(bill_depth_mm),
+         !is.na(bill_length_mm),
+         !is.na(species),
+         species=="Gentoo")
+
+# Build simple linear regression
+lm_gentoo_1 = lm(bill_depth_mm ~ bill_length_mm, data=gentoo)
+summary(lm_gentoo_1)
+
+# Build multiregression
+lm_gentoo_3x = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm, data=gentoo)
+summary(lm_gentoo_3x) # bill length no longer significant
+
+vif(lm_gentoo_3x) # vif values < 2, no multicollinearity
+AIC(lm_gentoo_1, lm_gentoo_3x) # lm_gentoo_male_3x performs significantly better
+
+library(ggiraph)
+library(ggiraphExtra)
+ggPredict(lm_gentoo_3x, se=TRUE, interactive=TRUE)
+```
+
+
+
+
+
+
+
+
+

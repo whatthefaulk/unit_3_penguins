@@ -139,7 +139,7 @@ For `lm_bad` the observations wiggle around the straight line in a more severe S
 
 #### Checking for multicollinearity (in multiple regression)
 
-If your linear regression has more than one explanatory variable, the X's should not be very tightly correlated. One of the primary indicators of multicollinearity is the variance inflation factor (VIF). The VIF indicates the amount of increase in variance of regression coefficient relative to when all predictors are uncorrelated. If the VIF of a variable is high, it means the variance explained by that variable is already explained by other X variables present in the given model, which means that variable is likely redundant. The lower the VIF, the better. If the VIF is less than 2, we meet the assumption of no multicollinearity. Note that this is a very conservative cutoff, some have recommended 10 as a reasonable cutoff. 
+If your linear regression has more than one explanatory variable, the X's should not be very tightly correlated. One of the primary indicators of multicollinearity is the variance inflation factor (VIF). The VIF indicates the amount of increase in variance of regression coefficient relative to when all predictors are uncorrelated. If the VIF of a variable is high, it means the variance explained by that variable is already explained by other X variables present in the given model, which means that variable is likely redundant. The lower the VIF, the better. If the VIF is less some threshold, we meet the assumption of no multicollinearity. Common VIF thresholds are 3, 5 and 10, where the smaller thresholds are more conservative. 
 
 So far in this lesson, we have just been looking at simple regression. To demonstrate how you could check the assumption of multicolinearity, we can build a quick multiple regression model and run the `vif()` function from the `car` package.
 
@@ -148,7 +148,11 @@ lm_multi = lm(bill_depth_mm ~ bill_length_mm + body_mass_g, data=gentoo_males)
 vif(lm_multi)
 ```
 
-It appears that the VIF for both of our predictors is less than 2, so we have met the assumption of multicollinearity for this model. If there is multicollinearity present in your model and you violate this assumption, however, you have the options of:
+It appears that the VIF for both of our predictors is less than 3, so we have definitely met the assumption of multicollinearity for this model. 
+
+If you are testing collinearity with a more complex model, such as one that includes a categorical variable, the vif() function will return Generalized Variation Inflation Factors (GVIF) and $GVIF^(1/(2*df)$. You can apply the test by squaring the  $GVIF^(1/(2*df)$ and applying that value to the same VIF threshold that you like to use, i.e. 3, 5 or 10, depending on how conservative you want to be.
+
+If there is multicollinearity present in your model and you violate this assumption, however, you have the options of:
 
 1. combining highly correlated predictors into a single index
 2. removing predictor(s)
@@ -173,6 +177,19 @@ durbinWatsonTest(lm_bad)
 the p-value is < 0.05, so we reject the null hypothesis and find that our data ARE autocorrelated. Again, this is a nonsensical test given our data, however, they are reading as autocorrelated because our data are listed in order by species. So the first part of the data all look similar becuase they are all Adelie penguins. The second group of the data are all Gentoo, and the third group are all Chinstrap. That makes the data look autocorrelated.
 
 If you find you legitimately have autocorrelation, you can identify your lag and use Newey-West robust standard errors.
+
+#### Comparing fitness of models
+
+Akaike’s Information Criterion (AIC) is a very useful model selection tool for comparing the fitness of 2 or more models, whether or not they are "nested" models. The AIC uses the likelihood of a model and penalizes it for the number of parameters included in the model. Parsimony is favored, which means if 2 models do a very similar job at predicting a dependent variable, the AIC selects for the simpler model. Although the AIC will choose the best model from a set, it won’t say anything about absolute quality. In other words, if all of your models are poor, it will choose the best of a bad bunch. The function `AIC()` in R can be used to compare models, and the model with the lowest AIC is considered the best in the bunch. A good rule of thumb is that if the difference in AIC is greater than 2, than the model with the lower AIC is a significantly better fit than the other model(s). When comparing the AIC of 2 or more models, the models must be fit using the same set of data. So, for example, it wouldn't make any sense to compare the AIC of `lm_good` and `lm_bad` because `lm_bad` is fit using all of our penguin data and `lm_good` is fit using only Gentoo males.
+
+We can compare the AIC of lm_good and lm_multi, since these were both built using the Gentoo males data:
+
+```{r}
+# Compare model fitness using Akaike Information Criterion
+AIC(lm_good, lm_multi)
+```
+
+Technically `lm_good` is a better fit than `lm_multi.` The likelihood of `lm_multi` must be at least as high or higher (i.e. good at predicting bill depth) as the likelihood of `lm_good` because it has all of the explanatory power of `lm_good`, plus it adds an additional explanatory variable. However, `lm_good` still has a lower AIC (i.e. a better fit) because the addition of body mass did not improve `lm_multi` very much, and `lm_multi` is penalized in the AIC for being a more complex model, since `lm_multi` is a model with 3 parameters whereas `lm_good` is a model with only 2 parameters.
 
 #### Checking the data for outliers
 

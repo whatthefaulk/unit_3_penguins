@@ -123,6 +123,10 @@ ggplot(data=penguins, aes(x=bill_length_mm, y=bill_depth_mm, color=species)) +
 
 So that makes it very clear that running all three species together was a serious logical error, and it produced a completely untrue result that bill depth increases as bill length decreases In fact, when we split the three species apart, we can see that bill depth increases with increasing bill length (as you'd expect) and the relationships look pretty similar for each species. This is an example of Simpson's paradox, which occurs when trends that appear when a dataset is separated into groups reverse when the data are aggregated. Basically, when doing statistics, you want to use your brain and your gut to build models that make sense.
 
+### Exercise 5.1
+
+Build a model predicting Gentoo bill length as a function of flipper length. Plot the predictions. Which explanatory variable (bill length vs. flipper length) does a better job of predicting bill depth? What is your evidence?
+
 ### Multiple linear regression
 
 In life, we typically can't do a very good job explaining variation in some dependent variable using just a single independent variable. Multiple linear regression is when we build a function with multiple independent variables of the form:
@@ -168,6 +172,7 @@ lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins_lm_3)
 There are several different ways to access your model results. You can copy and paste coefficient estimates, p-values, etc. from the `summary()` output, or you can extract various elements from the model variable using specialized functions like `coef()`. If you want your results to look like an ANOVA table (remember, ANOVA and linear regression are mathematically equivalent), you can use the `anova()` function. Probably the most efficient way to get at your model results makes use of the `tidy()` function in the `broom` package in the tidyverse. Note that `broom` is one of the packages that, although it is part of the tidyverse, it does not load up with the `library(tidyverse)`, it must be loaded separately with `library(broom)`. This outputs the model results in a neat data frame, which you can easily export to a `.csv` file to save or create a table in your manuscript. Check the help page `?tidy.lm` and you can see that you can ask for confidence intervals to be output on your coefficients.
 
 ```{r}
+summary(lm_3)
 coef(lm_3)
 anova(lm_3)
 broom::tidy(lm_3)
@@ -269,30 +274,9 @@ ggplot() +
   ggsave(filename = "figures/bill_depth_model.png", device = "png", width = 5, height = 3, units = "in", dpi = 300)
 ```
 
-#### Two continuous variables (do this as an exercise?)
+### Exercise 5.2
 
-What if you were working with taxadermy penguins from a museum collection and could measure bill depth and bill length but needed to use those to predict body mass?
-
-VIF
-
-Including species:
-
-```{r}
-
-lm_4 = lm(bill_depth_mm ~ bill_length_mm*species, data=penguins)
-AIC(lm_1, lm_3, lm_4)
-
-# https://cran.r-project.org/web/packages/ggiraphExtra/vignettes/ggPredict.html
-ggPredict(lm_4, se=TRUE, interactive=TRUE)
-```
-
-With predict():
-https://aosmith.rbind.io/2018/11/16/plot-fitted-lines/
-interval = confidence vs. interval = prediction
-
-with ggPredict():
-https://cran.r-project.org/web/packages/ggiraphExtra/vignettes/ggPredict.html
-
+Build a linear regression to predict the bill depth of Gentoo penguins as a function of 2 explanatory continuous variables: bill length and flipper length. Do some exploratory data analysis and check model diagnostics. Use the function `vif()` to make sure that you don't have a problem with multicollinearity. Then use the function `AIC()` to compare the Akaike Information Criterion between this model and a simple linear regression we built before with bill depth as a function of just bill length. Use the help pages or the tutorial on regression diagnostics in this unit to make sure you are using `vif()` and `AIC()` correctly. What are your findings? Plot the data, the model predictions and the 95% confidence intervals or the standard errors.
 
 ### More information
 
@@ -303,5 +287,4 @@ Diagnostic tests for linear regression:
 https://www.statmethods.net/stats/rdiagnostics.html
 https://www.ianruginski.com/post/regressionassumptions/
 
-If you are interested in Model-II regression (where there is error in the measurement of the independent variables as well as the dependent variables), the `lmodel2` package can run a variety of model 2 regressions, plot them, calculate confidence intervals, and perform statistical tests.
 
