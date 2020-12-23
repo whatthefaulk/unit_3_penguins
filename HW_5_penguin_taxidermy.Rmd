@@ -1,0 +1,23 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE) 
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+```
+
+### Unit 3: Penguins
+### Homework 5: Penguin taxedermy
+
+***
+
+Imagine that you are planning a research project with a museum's collection of taxedermied penguins. You can measure bill length, bill depth and flipper length on each stuffed bird. You can also identify the sex of the stuffed bird, and you have the year and island that the bird was collected. However, for the work you are interested in doing, it's really important that you know each individual's body mass, or at least can estimate it reasonably well. However, weighing your taxedermied penguin doesn't really tell you anything about the animal's weight before it was killed and eviscerated... so you're in trouble. 
+
+Luckily, another lab group did a penguin field study of the same three penguin species, the same islands and during the same years and made their data available online as the palmerpenguins dataset! You are in luck! Build the best model(s) that you can to predict penguin body mass. Make sure you conduct some exploratory data analysis, and run diagnostics on the models that you build. Explain why you picked the model(s) that you did, and plot the predictions and standard errors or confidence intervals, along with the data you used to generate it. 
+
+Turn in your homework in a well-organized R Markdown file.
+
+
+
+
