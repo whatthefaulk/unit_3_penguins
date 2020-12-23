@@ -9,7 +9,7 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE)
 ### Unit 3: Penguins
 #### Lesson 5: Linear models
 #### New functions: 
-lm(), geom_smooth(), geom_ribbon(), plot.lm(), coef(), anova(), broom::tidy(), predict(), ggPredict(), expand.grid()         (AIC(), step(), ...?)
+lm(), geom_smooth(), geom_ribbon(), plot.lm(), coef(), anova(), broom::tidy(), predict(), ggPredict(), expand.grid(), expand(), broom::augment(), AIC(), step(), vif()
 
 ***
 
@@ -175,8 +175,7 @@ There are several different ways to access your model results. You can copy and 
 summary(lm_3)
 coef(lm_3)
 anova(lm_3)
-broom::tidy(lm_3)
-broom::tidy(lm_3, conf.int = TRUE, conf.level = 0.95)
+broom::tidy(lm_3, conf.int = TRUE, conf.level = 0.95) # Added confidence intervals to output
 ```
 
 Now let's plot the data, the linear model predictions and the standard errors on those predictions. Although it seems super similar, recall that the plot we made at the end of our simple linear regression section actually had the results of three distinct linear models plotted onto the same figure: one for each speices. This multiple regression model `lm_3` that we created is a single model with two explanatory variables, bill_length_mm and species. The slopes associated with each species must be equivalent in this model formulation. 
@@ -273,6 +272,57 @@ ggplot() +
   xlab("Bill length (mm)") + ylab("Bill depth (mm)") +
   ggsave(filename = "figures/bill_depth_model.png", device = "png", width = 5, height = 3, units = "in", dpi = 300)
 ```
+
+#### Adding an interaction term
+
+Recall our model `lm_3`:
+
+```{r, eval=FALSE}
+lm_3 = lm(bill_depth_mm ~ bill_length_mm + species, data=penguins_lm_3)
+```
+
+We allow bill depth to depend on both the continuous variable bill length and the categorical variable species, however, the species independent variable only has the power to change the y-intercept of the predictions for each of the three species. In this formulation, the prediction lines associated with each species are parallel. But what if this isn't a good formulation for predicting bill depth? Perhaps, for example, Chinstrap bill depth increases more slowly with increasing bill length than Gentoo bill depth. To explore the possibility that the relationship between bill depth and bill length *changes* for each of the three species, we can add an interaction term. If we model the interaction between bill length and species, the bill depth prediction lines for each species are no longer forced to be parallel. Variable interactions are indicated with the `*` sign in R model formulas:
+
+```{r}
+lm_4 = lm(bill_depth_mm ~ bill_length_mm*species, data=penguins_lm_3)
+```
+
+Note that `bill_length_mm*species` is short-hand for `bill_length_mm + species + bill_length_mm X species`. Interaction terms are coded this way because when you build a model with an interaction, it is important to always include the interacting variables on their own as well. You wouldn't want a model that looked like `bill_depth_mm ~ bill_length_mm X species` without including bill length and species as additional terms because then the interaction coefficients would be tasked with accounting for all of the variation from each of those two independent variables in addition to the interaction between those variables. This would make interpretation difficult and may bias our understanding of the importance of the interaction.
+
+If we look at the model results for `lm_3` side by side with `lm_4`, we can see that the inclusion of the interaction term is not helping our model very much. The $R^2$ measure barely improves with `lm_4`, and the $Adjusted-R^2$ measure is actually lower. None of the interaction coefficients in `lm_4` are statistically significant. 
+
+```{r}
+summary(lm_3)
+summary(lm_4)
+```
+
+If we use the AIC() function to compare the Akaike Information Criterion between the 2 models, the AIC for `lm_4` is higher, meaning the fitness is poorer compared to `lm_3`. Another option for comparing a complex model with a simpler model is to use the `step()` function. You can input the most complicated model formulation that you are intersted in and this function will reduce the model's complexity one step at a time and check the fitness at each step. Read the documentation on `step()` to learn more about how decisions are made.
+
+```{r}
+AIC(lm_3, lm_4)
+best_model = step(lm_4)
+best_model
+```
+
+If we plotted the `lm_4` predictions for each of the 3 species, the lines will probably look pretty close to parallel, since the interaction terms were not significant. We can build our predictions with the same methods we used for `lm_3`. 
+
+```{r}
+# Plotting predictions with ggPredict(): 
+# ggPredict(lm_4, se=TRUE, interactive=TRUE)  # easy, but less customizable
+
+# Get model predictions with newdata
+newdata = penguins_lm_3 %>% expand(bill_length_mm, species)
+lm_4_predict = lm_4 %>%
+  augment(newdat = newdata, se_fit=TRUE) %>%
+  mutate(lwr = .fitted - 1.96 * .se.fit, upr = .fitted + 1.96 * .se.fit) # Calculate 95% C.I. using SE
+# Plot the data and the model predictions
+ggplot() +
+  geom_point(aes(x = bill_length_mm, y = bill_depth_mm, color = species), data=penguins_lm_3) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, x = bill_length_mm, fill = species, color = NULL), alpha = .15, data=lm_4_predict) +
+  geom_line(data=lm_4_predict, aes(y = .fitted, x = bill_length_mm, color=species), size = 1)
+```
+
+As we expected, the distinct slopes of bill depth vs. bill length for each of the 3 species are almost parallel. Since the AIC values are lower (i.e. better fit) for lm_3, we would select that as our final model instead of lm_4. 
 
 ### Exercise 5.2
 
