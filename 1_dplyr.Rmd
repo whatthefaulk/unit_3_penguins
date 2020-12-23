@@ -199,6 +199,10 @@ female_mean_mass = mean(unlist(penguins[which(penguins$sex == "female"), "body_m
 
 The `dplyr` syntax is simpler, and the name of the original dataset (`penguins`) does not need to be repeated when using `filter()`, unlike when using `which()`. Base R also requires the creation of an interim variable, or if you want it to all fit into one line of code, you must use the `which()` function to subset across rows and columns simultaneously and then `unlist()` your `data.frame` or `tibble` so that it can be read into the `mean()` function as an array. 
 
+### Exercise 1.1
+
+Build a data set that contains only Chinstrap penguins with a flipper length > 200 mm. What is the percentage of females in that subset of data? How does that compare to the percentage of all female Chinstrap penguins included in the original data set? Use the summary() function to compare the sex ratio of the full Chinstrap dataset vs. the subset of Chinstrap penguins with a flipper length > 200 mm. Or you can use again subset the data by sex and use the dim() function to count the number of rows in the subsetted data. Given this analysis, what do you think the relationship is between sex and flipper length?
+
 ### More dplyr functions: filter() group_by() summarize() print()
 
 Now let's ratchet up our analysis a few notches and say that you need to know the mean body mass for each sex of each penguin species. Perhaps you want to throw out unknown sex birds so that they don't bias your data. You can use `group_by()` to indicate that you want to consider each sex and each species as a distinct dataset when you use the `summarize()` function. Let's finish it off by printing it out to the console with `print()`. These may be valuable summary statistics that we want to refer back to when we are writing up our analysis, or perhaps we'll want to include the results in a table in a presentation at a conference. Either way, let's save our new summary table of mean body mass to a `.csv` in our project folder:
@@ -224,6 +228,10 @@ We used the `mean()` function in our dplyr `summarize()` command, but there are 
 *  Position: first(), last(), nth(),
 *  Count:    n(), n_distinct()
 *  Logical:  any(), all()
+
+### Exercise 1.2
+
+Repeat Exercise 1.1, but this time use `group_by()` along with the `n()` function inside `summarize()` to count the number of Chinstrap penguins of each sex. Again compare the sex ratio of all Chinstrap observations vs. the sex ratio of Chinstrap penguins with a flipper length > 200 mm.
 
 ### More dplyr functions: group_by() summarize() mutate() distinct() select() arrange()
 
@@ -253,6 +261,9 @@ penguins_sorted = penguins %>%
   arrange(island, species, sex)
 ```
 
+### Exercise 1.3
+
+What is the mean bill length (in inches) of Adelie penguins found on either Dream island or Biscoe island? What is the standard deviation? Is the mean larger or smaller than the mean bill length of Adelie penguins found on Torgersen island?
 
 ### More Information:
 
@@ -271,9 +282,6 @@ https://allisonhorst.github.io/
 Allison's data science-themed artwork is especially unique and inspirational:
 
 https://github.com/allisonhorst/stats-illustrations
-
-
-
 
 
 
