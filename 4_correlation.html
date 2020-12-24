@@ -370,8 +370,9 @@ summary {
 <div id="lesson-4-correlation" class="section level4">
 <h4>Lesson 4: Correlation</h4>
 </div>
-<div id="functions-cor-cor.test-ggallyggpairs" class="section level4">
-<h4>Functions: cor(), cor.test(), GGally::ggpairs()</h4>
+<div id="functions" class="section level4">
+<h4>Functions:</h4>
+<p>cor(), cor.test(), GGally::ggpairs()</p>
 <hr />
 </div>
 </div>
@@ -399,6 +400,20 @@ library(palmerpenguins)
 gentoo = penguins %&gt;% 
   filter(species==&quot;Gentoo&quot;)
 
+# Exploratory data analysis:
+glimpse(gentoo)
+## Rows: 124
+## Columns: 8
+## $ species           &lt;fct&gt; Gentoo, Gentoo, Gentoo, Gentoo, Gentoo, Gentoo, Gen…
+## $ island            &lt;fct&gt; Biscoe, Biscoe, Biscoe, Biscoe, Biscoe, Biscoe, Bis…
+## $ bill_length_mm    &lt;dbl&gt; 46.1, 50.0, 48.7, 50.0, 47.6, 46.5, 45.4, 46.7, 43.…
+## $ bill_depth_mm     &lt;dbl&gt; 13.2, 16.3, 14.1, 15.2, 14.5, 13.5, 14.6, 15.3, 13.…
+## $ flipper_length_mm &lt;int&gt; 211, 230, 210, 218, 215, 210, 211, 219, 209, 215, 2…
+## $ body_mass_g       &lt;int&gt; 4500, 5700, 4450, 5700, 5400, 4550, 4800, 5200, 440…
+## $ sex               &lt;fct&gt; female, male, female, male, male, female, female, m…
+## $ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 200…
+summarize(gentoo)
+## # A tibble: 1 x 0
 ggplot() +
   geom_point(aes(x=bill_length_mm, y=bill_depth_mm), data=gentoo)
 ## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>

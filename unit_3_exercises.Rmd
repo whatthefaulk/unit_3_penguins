@@ -11,13 +11,11 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE)
 ```{r}
 library(tidyverse)
 library(palmerpenguins)
-library(gvlma) # gvlma()
-library(car)  # vif()
 ```
 
 ### Exercise 1.1
 
-Build a data set that contains only Chinstrap penguins with a flipper length > 200 mm. What is the percentage of females in that subset of data? How does that compare to the percentage of all female Chinstrap penguins included in the original data set? Use the summary() function to compare the sex ratio of the full Chinstrap dataset vs. the subset of Chinstrap penguins with a flipper length > 200 mm. Or you can use again subset the data by sex and use the dim() function to count the number of rows in the subsetted data. Given this analysis, what do you think the relationship is between sex and flipper length?
+Build a data set that contains only Chinstrap penguins with a flipper length > 200 mm. What is the percentage of females in that subset of data? How does that compare to the percentage of all female Chinstrap penguins included in the original data set? Use the `summary()` function to compare the sex ratio of the full Chinstrap dataset vs. the subset of Chinstrap penguins with a flipper length > 200 mm. Or you can use again subset the data by sex and use the `dim()` function to count the number of rows in the subsetted data. Given this analysis, what do you think the relationship is between sex and flipper length?
 
 ```{r}
 # Sex ratio of all Chinstrap observations
@@ -71,6 +69,78 @@ penguins %>%
   summarize(mean_bill_length_in = mean(bill_length_in), sd_bill_length_in = sd(bill_length_in))
 ```
 
+### Exercise 2.1
+
+Build a scatter plot of bill depth vs. bill length for Adelie penguins. Map the point colors to the island that the Adelie penguin was observed on. Add axes labels and a main title. 
+
+```{r}
+adelie = penguins %>%
+  filter(species=="Adelie")
+ggplot(data = adelie) + 
+  geom_point(aes(y=bill_depth_mm, x=bill_length_mm, color=island)) + 
+  xlab("Bill length (mm)") +
+  ylab("Bill Depth (mm)") +
+  ggtitle("Adelie bills")
+```
+
+### Exercise 2.2
+
+Build another scatter plot of bill depth vs. bill length for all three penguin species. Map the point colors to the penguin's sex. Use `facet_wrap()` to plot each species in a separate panel. Look at the documentation for `facet_wrap()` and play around with the `scales` parameter. What is the default value? Try plotting with the parameter `scales="free"`. Instead of using the default theme, choose a different pre-packaged theme (I like `theme_bw()` and `theme_classic()`). Save the plot.
+
+```{r}
+ggplot(data = penguins) + 
+  geom_point(aes(y=bill_depth_mm, x=bill_length_mm, color=sex)) + 
+  facet_wrap(~species, scales="free") + 
+  theme_classic() +
+  ggsave(filename = "figures/bill_depth_v_length.png", device = "png", width = 6, height = 3.5, units = "in", dpi = 300)
+```
+
+### Exercise 3.1
+
+Are Adelie penguin flipper lengths significantly different between males and females? Do some exploratory data analysis. Compute summary statistics and plot histograms. Then conduct an independent sample t-test. What do your results show?
+
+```{r}
+library(rstatix) # t_test()
+
+# Simplify the dataset to what we need
+ex_1_data = penguins %>%
+  filter(species =="Adelie",
+         !is.na(flipper_length_mm),
+         !is.na(sex)) %>%   # students may forget to do this
+  dplyr::select(sex, flipper_length_mm) %>%
+  droplevels() # This removes the "Chinstrap" level from the species factor
+
+# Calculate summary stats
+ex_1_data %>%
+  group_by(sex) %>%
+  summarize(mean=mean(flipper_length_mm), sd=sd(flipper_length_mm))
+
+# Plot a quick histogram:
+ggplot() +
+  geom_histogram(aes(x=flipper_length_mm), data=ex_1_data) +
+  facet_wrap(~sex)
+
+# Base R:
+t.test(ex_1_data$flipper_length_mm ~ ex_1_data$sex)
+# rstatix:
+ex_1_data %>% 
+  t_test(flipper_length_mm ~ sex)
+# Flipper length is significantly different between the 2 sexes
+```
+
+### Exercise 4.1
+
+What is the correlation between flipper length and body mass with all penguin species combined into a single dataset? What is the correlation between flipper length and body mass for each of the 3 species separately? In which species are these 2 biological metrics least correlated? Most correlated?
+
+```{r}
+cor.test(x=penguins$flipper_length_mm, y=penguins$body_mass_g, use="complete.obs")
+
+cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins)
+cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins %>% filter(species=="Adelie"))
+cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins %>% filter(species=="Gentoo"))
+cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins %>% filter(species=="Chinstrap"))
+```
+
 ### Exercise 5.1
 
 Build a model predicting Gentoo bill length as a function of flipper length. Plot the predictions. Which explanatory variable (bill length vs. flipper length) does a better job of predicting bill depth? What is your evidence?
@@ -98,6 +168,11 @@ Build a linear regression to predict the bill depth of Gentoo penguins as a func
 ####3!!!!!!!!!!!1######### Work on how we'll plot the predictions for 2 continuous variables
 
 ```{r}
+library(gvlma) # gvlma()
+library(car)  # vif()
+library(ggiraph)
+library(ggiraphExtra) # ggPredict()
+
 # Drop NA data before fitting model. This helps me avoid problems down the line with predict()
 gentoo = penguins %>%
   filter(!is.na(bill_depth_mm),
@@ -116,8 +191,6 @@ summary(lm_gentoo_3x) # bill length no longer significant
 vif(lm_gentoo_3x) # vif values < 2, no multicollinearity
 AIC(lm_gentoo_1, lm_gentoo_3x) # lm_gentoo_male_3x performs significantly better
 
-library(ggiraph)
-library(ggiraphExtra)
 ggPredict(lm_gentoo_3x, se=TRUE, interactive=TRUE)
 ```
 

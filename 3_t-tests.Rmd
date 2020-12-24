@@ -229,6 +229,9 @@ We don't have any good exmaples of paired data in our penguins dataset. However,
 
 In the situations where the assumptions are violated, non-parametric tests, such as Wilcoxon test, are recommended.
 
+### Exercise 3.1
+
+Are Adelie penguin flipper lengths significantly different between males and females? Do some exploratory data analysis. Compute summary statistics and plot histograms. Then conduct an independent sample t-test. What do your results show?
 
 ### Acknowledgements
 

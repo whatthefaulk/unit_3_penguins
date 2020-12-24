@@ -73,7 +73,7 @@ glimpse(penguins)
 Now that I remember my variable names, let's build our scatterplot:
 
 ```{r, warning=TRUE}
-ggplot(penguins) + 
+ggplot(data=penguins) + 
   geom_point(aes(x=flipper_length_mm, y=body_mass_g))
 ```
 
@@ -96,7 +96,7 @@ Well the default strategy in `ggplot2` is to warn me that there are `NA`s, but p
 I wonder how the mass / flipper length relationship plays out for the three different penguin species? We can easily visualize this by making the same plot, but mapping the `color` aesthetic to species:
 
 ```{r}
-ggplot(penguins) + 
+ggplot(data=penguins) + 
   geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species))
 ```
 
@@ -105,7 +105,7 @@ Ok, so the mass vs. flipper length relationship looks pretty similar across all 
 That's a nice relationship between flipper length and size, where heavy birds have longer flippers. We'll learn how to run stats and models to explicitly examine the relationship between variables at a later time. However, we can use `geom_smooth()` to add in a simple smoother line to help guide our eye to see the relationship between these two variables. We'll do this by adding `geom_smooth()` as just another layer to our `ggplot`:
 
 ```{r}
-ggplot(penguins) + 
+ggplot(data=penguins) + 
   geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species)) +
   geom_smooth(aes(x=flipper_length_mm, y=body_mass_g))
 ```
@@ -113,7 +113,7 @@ ggplot(penguins) +
 Now let's make the same scatterplot, but customize the x- and y-axis labels, and add a title to the plot. We can do this by adding more layers to our ggplot() call:
 
 ```{r}
-ggplot(penguins) + 
+ggplot(data=penguins) + 
   geom_point(aes(x=flipper_length_mm, y=body_mass_g, color=species)) + 
   xlab("Flipper length (mm)") +
   ylab("Body mass (g)") +
@@ -121,6 +121,10 @@ ggplot(penguins) +
 ```
 
 Not bad!
+
+### Exercise 2.1
+
+Build a scatter plot of bill depth vs. bill length for Adelie penguins. Map the point colors to the island that the Adelie penguin was observed on. Add axes labels and a main title. 
 
 ### Line graph
 
@@ -259,6 +263,10 @@ ggplot(penguins) +
 ```
 
 It’s also possible to control individual components of each theme, like the size and colour of the font used for the y axis.
+
+### Exercise 2.2
+
+Build another scatter plot of bill depth vs. bill length for all three penguin species. Map the point colors to the penguin's sex. Use `facet_wrap()` to plot each species in a separate panel. Look at the documentation for `facet_wrap()` and play around with the `scales` parameter. What is the default value? Try plotting with the parameter `scales="free"`. Instead of using the default theme, choose a different pre-packaged theme (I like `theme_bw()` and `theme_classic()`). Save the plot.
 
 ### For more information
 
