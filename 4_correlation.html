@@ -370,8 +370,8 @@ summary {
 <div id="lesson-4-correlation" class="section level4">
 <h4>Lesson 4: Correlation</h4>
 </div>
-<div id="functions" class="section level4">
-<h4>Functions:</h4>
+<div id="new-functions" class="section level4">
+<h4>New functions:</h4>
 <p>cor(), cor.test(), GGally::ggpairs()</p>
 <hr />
 </div>
@@ -453,6 +453,12 @@ cor.test(x=gentoo$bill_length_mm, y=gentoo$bill_depth_mm, use=&quot;complete.obs
 <li>1 indicates a strong positive correlation : this means that y increases with x (right panel figure)</li>
 </ul>
 <p>So for bill length vs. bill depth, Pearson’s r = 0.64. That’s a pretty solid correlation coefficient - those two variables definitely have a (positive) linear relationship. From cor.test() we can see that the p-value is much less than 0.05, so the correlation is “significant”.</p>
+<hr />
+</div>
+<div id="exercise-4.1" class="section level3">
+<h3>Exercise 4.1</h3>
+<p>Calculate the correlation between bill length and bill depth with all 3 penguin species combined into a single data set. Is the correlation stronger or weaker compared to the correlation between bill length and bill depth for Gentoo penguins alone? Do you notice anything unexpected about this correlation?</p>
+<hr />
 </div>
 <div id="correlation-matrix" class="section level3">
 <h3>Correlation matrix</h3>
@@ -497,11 +503,13 @@ gentoo %&gt;%
 <p class="caption">Credit: <a href="http://www.tylervigen.com/spurious-correlations" class="uri">http://www.tylervigen.com/spurious-correlations</a></p>
 </div>
 <p>It’s tempting to try to figure out a mechanism though, isn’t it?</p>
+<hr />
 </div>
-<div id="acknowledgments-and-more-information" class="section level3">
-<h3>Acknowledgments and more information</h3>
+<div id="more-information" class="section level3">
+<h3>More information</h3>
 <p>Here is another fabulous (and free!) textbook that inpsired this lesson, and that can be used as a resource for more information:</p>
 <p>Statistical Inference via Data Science: A ModernDive into R and the Tidyverse! By: Chester Ismay and Albert Y. Kim <a href="https://moderndive.com/index.html" class="uri">https://moderndive.com/index.html</a></p>
+<hr />
 </div>
 
 

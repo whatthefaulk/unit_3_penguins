@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 
 
 ### Unit 3: Penguins
-#### Lesson 1: Intro to tidyverse (data manipulation)
+#### Lesson 1: Intro to dplyr (data manipulation)
 #### New functions: 
 install.packages(), library(), as.data.frame(), filter(), arrange(), select(), rename(), mutate(), summarize(), group_by(), ungroup(), distinct(), print(), unlist(), write_csv()
 
@@ -24,6 +24,7 @@ To get the `Tidverse` packages up and running in your R script or your RMarkdown
 ```{r, eval=FALSE}
 install.packages("tidyverse")
 ```
+
 Remember you only have to install packages on your computer once. When you return to work in R the next day, or week, or month, etc. the package will still be installed on your computer. To use `Tidyverse` in your R script, you need to load the package library. This needs to happen at every R session where you intend to use that package:
 
 ```{r}
@@ -199,9 +200,13 @@ female_mean_mass = mean(unlist(penguins[which(penguins$sex == "female"), "body_m
 
 The `dplyr` syntax is simpler, and the name of the original dataset (`penguins`) does not need to be repeated when using `filter()`, unlike when using `which()`. Base R also requires the creation of an interim variable, or if you want it to all fit into one line of code, you must use the `which()` function to subset across rows and columns simultaneously and then `unlist()` your `data.frame` or `tibble` so that it can be read into the `mean()` function as an array. 
 
+***
+
 ### Exercise 1.1
 
 Build a data set that contains only Chinstrap penguins with a flipper length > 200 mm. What is the percentage of females in that subset of data? How does that compare to the percentage of all female Chinstrap penguins included in the original data set? Use the `summary()` function to compare the sex ratio of the full Chinstrap dataset vs. the subset of Chinstrap penguins with a flipper length > 200 mm. Or you can use again subset the data by sex and use the `dim()` function to count the number of rows in the subsetted data. Given this analysis, what do you think the relationship is between sex and flipper length?
+
+***
 
 ### More dplyr functions: filter() group_by() summarize() print()
 
@@ -229,9 +234,13 @@ We used the `mean()` function in our dplyr `summarize()` command, but there are 
 *  Count:    n(), n_distinct()
 *  Logical:  any(), all()
 
+***
+
 ### Exercise 1.2
 
 Repeat Exercise 1.1, but this time use `group_by()` along with the `n()` function inside `summarize()` to count the number of Chinstrap penguins of each sex. Again compare the sex ratio of all Chinstrap observations vs. the sex ratio of Chinstrap penguins with a flipper length > 200 mm.
+
+***
 
 ### More dplyr functions: group_by() summarize() mutate() distinct() select() arrange()
 
@@ -261,9 +270,13 @@ penguins_sorted = penguins %>%
   arrange(island, species, sex)
 ```
 
+***
+
 ### Exercise 1.3
 
 What is the mean bill length (in inches) of Adelie penguins found on either Dream island or Biscoe island? What is the standard deviation? Is the mean larger or smaller than the mean bill length of Adelie penguins found on Torgersen island?
+
+***
 
 ### More Information:
 

@@ -122,9 +122,13 @@ ggplot(data=penguins) +
 
 Not bad!
 
+***
+
 ### Exercise 2.1
 
 Build a scatter plot of bill depth vs. bill length for Adelie penguins. Map the point colors to the island that the Adelie penguin was observed on. Add axes labels and a main title. 
+
+***
 
 ### Line graph
 
@@ -264,9 +268,13 @@ ggplot(penguins) +
 
 It’s also possible to control individual components of each theme, like the size and colour of the font used for the y axis.
 
+***
+
 ### Exercise 2.2
 
 Build another scatter plot of bill depth vs. bill length for all three penguin species. Map the point colors to the penguin's sex. Use `facet_wrap()` to plot each species in a separate panel. Look at the documentation for `facet_wrap()` and play around with the `scales` parameter. What is the default value? Try plotting with the parameter `scales="free"`. Instead of using the default theme, choose a different pre-packaged theme (I like `theme_bw()` and `theme_classic()`). Save the plot.
+
+***
 
 ### For more information
 

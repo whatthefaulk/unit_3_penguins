@@ -8,7 +8,7 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE)
 
 ### Unit 3: Penguins
 #### Lesson 4: Correlation
-#### Functions: 
+#### New functions: 
 cor(), cor.test(), GGally::ggpairs()
 
 ***
@@ -66,6 +66,14 @@ Interpreting Pearson's r:
 
 So for bill length vs. bill depth, Pearson's r = 0.64. That's a pretty solid correlation coefficient - those two variables definitely have a (positive) linear relationship. From cor.test() we can see that the p-value is much less than 0.05, so the correlation is "significant". 
 
+***
+
+### Exercise 4.1
+
+Calculate the correlation between bill length and bill depth with all 3 penguin species combined into a single data set. Is the correlation stronger or weaker compared to the correlation between bill length and bill depth for Gentoo penguins alone? Do you notice anything unexpected about this correlation?
+
+***
+
 ### Correlation matrix
 
 Let's say that we want to get a quick sense of how all of the variables relate to each other. Which penguin body measurements are most related? I can send multiple columns from our data.frame to `cor()` at once, and it will return a matrix with the correlations of each variable vs. all of the others:
@@ -105,14 +113,14 @@ Correlation doesn’t imply causation. In other words, if two variables have hig
 
 It's tempting to try to figure out a mechanism though, isn't it?
 
-### Exercise 4.1
+***
 
-What is the correlation between flipper length and body mass with all penguin species combined into a single dataset? What is the correlation between flipper length and body mass for each of the 3 species separately? In which species are these 2 biological metrics least correlated? Most correlated?
-
-### Acknowledgments and more information
+### More information
 
 Here is another fabulous (and free!) textbook that inpsired this lesson, and that can be used as a resource for more information:
 
 Statistical Inference via Data Science: A ModernDive into R and the Tidyverse!
 By: Chester Ismay and Albert Y. Kim
 https://moderndive.com/index.html
+
+***

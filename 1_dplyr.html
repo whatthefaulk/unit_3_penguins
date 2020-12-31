@@ -367,8 +367,8 @@ summary {
 
 <div id="unit-3-penguins" class="section level3">
 <h3>Unit 3: Penguins</h3>
-<div id="lesson-1-intro-to-tidyverse-data-manipulation" class="section level4">
-<h4>Lesson 1: Intro to tidyverse (data manipulation)</h4>
+<div id="lesson-1-intro-to-dplyr-data-manipulation" class="section level4">
+<h4>Lesson 1: Intro to dplyr (data manipulation)</h4>
 </div>
 <div id="new-functions" class="section level4">
 <h4>New functions:</h4>
@@ -557,6 +557,12 @@ female_mean_mass = mean(female_penguins$body_mass_g)
 # Or to do it all in one line of code: 
 female_mean_mass = mean(unlist(penguins[which(penguins$sex == &quot;female&quot;), &quot;body_mass_g&quot;]))</code></pre>
 <p>The <code>dplyr</code> syntax is simpler, and the name of the original dataset (<code>penguins</code>) does not need to be repeated when using <code>filter()</code>, unlike when using <code>which()</code>. Base R also requires the creation of an interim variable, or if you want it to all fit into one line of code, you must use the <code>which()</code> function to subset across rows and columns simultaneously and then <code>unlist()</code> your <code>data.frame</code> or <code>tibble</code> so that it can be read into the <code>mean()</code> function as an array.</p>
+<hr />
+</div>
+<div id="exercise-1.1" class="section level3">
+<h3>Exercise 1.1</h3>
+<p>Build a data set that contains only Chinstrap penguins with a flipper length &gt; 200 mm. What is the percentage of females in that subset of data? How does that compare to the percentage of all female Chinstrap penguins included in the original data set? Use the <code>summary()</code> function to compare the sex ratio of the full Chinstrap dataset vs. the subset of Chinstrap penguins with a flipper length &gt; 200 mm. Or you can use again subset the data by sex and use the <code>dim()</code> function to count the number of rows in the subsetted data. Given this analysis, what do you think the relationship is between sex and flipper length?</p>
+<hr />
 </div>
 <div id="more-dplyr-functions-filter-group_by-summarize-print" class="section level3">
 <h3>More dplyr functions: filter() group_by() summarize() print()</h3>
@@ -589,6 +595,12 @@ write_csv(penguin_mean_mass, path=&quot;data/processed/peguin_mean_body_mass_g.c
 <li>Count: n(), n_distinct()</li>
 <li>Logical: any(), all()</li>
 </ul>
+<hr />
+</div>
+<div id="exercise-1.2" class="section level3">
+<h3>Exercise 1.2</h3>
+<p>Repeat Exercise 1.1, but this time use <code>group_by()</code> along with the <code>n()</code> function inside <code>summarize()</code> to count the number of Chinstrap penguins of each sex. Again compare the sex ratio of all Chinstrap observations vs. the sex ratio of Chinstrap penguins with a flipper length &gt; 200 mm.</p>
+<hr />
 </div>
 <div id="more-dplyr-functions-group_by-summarize-mutate-distinct-select-arrange" class="section level3">
 <h3>More dplyr functions: group_by() summarize() mutate() distinct() select() arrange()</h3>
@@ -627,6 +639,12 @@ penguins_no_bill = penguins %&gt;%
 # Sort data by island, then species, then sex:
 penguins_sorted = penguins %&gt;%
   arrange(island, species, sex)</code></pre>
+<hr />
+</div>
+<div id="exercise-1.3" class="section level3">
+<h3>Exercise 1.3</h3>
+<p>What is the mean bill length (in inches) of Adelie penguins found on either Dream island or Biscoe island? What is the standard deviation? Is the mean larger or smaller than the mean bill length of Adelie penguins found on Torgersen island?</p>
+<hr />
 </div>
 <div id="more-information" class="section level3">
 <h3>More Information:</h3>

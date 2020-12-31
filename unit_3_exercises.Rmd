@@ -5,6 +5,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE) 
 ```
+
 ### In-class exercises
 ### Unit 3: Penguins
 
@@ -12,6 +13,8 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE)
 library(tidyverse)
 library(palmerpenguins)
 ```
+
+***
 
 ### Exercise 1.1
 
@@ -32,6 +35,8 @@ sex_ratio_subset = 1/18
 dim(dat_exer_1 %>% filter(sex=="female"))[1]/dim(dat_exer_1)[1]
 ```
 
+***
+
 ### Exercise 1.2
 
 Repeat Exercise 1.1, but this time use `group_by()` along with the `n()` function inside `summarize()` to count the number of Chinstrap penguins of each sex. Again compare the sex ratio of all Chinstrap observations vs. the sex ratio of Chinstrap penguins with a flipper length > 200 mm.
@@ -49,6 +54,8 @@ penguins %>%
   group_by(sex) %>%
   summarize(n=n())
 ```
+
+***
 
 ### Exercise 1.3
 
@@ -69,6 +76,8 @@ penguins %>%
   summarize(mean_bill_length_in = mean(bill_length_in), sd_bill_length_in = sd(bill_length_in))
 ```
 
+***
+
 ### Exercise 2.1
 
 Build a scatter plot of bill depth vs. bill length for Adelie penguins. Map the point colors to the island that the Adelie penguin was observed on. Add axes labels and a main title. 
@@ -83,6 +92,8 @@ ggplot(data = adelie) +
   ggtitle("Adelie bills")
 ```
 
+***
+
 ### Exercise 2.2
 
 Build another scatter plot of bill depth vs. bill length for all three penguin species. Map the point colors to the penguin's sex. Use `facet_wrap()` to plot each species in a separate panel. Look at the documentation for `facet_wrap()` and play around with the `scales` parameter. What is the default value? Try plotting with the parameter `scales="free"`. Instead of using the default theme, choose a different pre-packaged theme (I like `theme_bw()` and `theme_classic()`). Save the plot.
@@ -94,6 +105,8 @@ ggplot(data = penguins) +
   theme_classic() +
   ggsave(filename = "figures/bill_depth_v_length.png", device = "png", width = 6, height = 3.5, units = "in", dpi = 300)
 ```
+
+***
 
 ### Exercise 3.1
 
@@ -128,18 +141,25 @@ ex_1_data %>%
 # Flipper length is significantly different between the 2 sexes
 ```
 
+***
+
 ### Exercise 4.1
 
-What is the correlation between flipper length and body mass with all penguin species combined into a single dataset? What is the correlation between flipper length and body mass for each of the 3 species separately? In which species are these 2 biological metrics least correlated? Most correlated?
+Calculate the correlation between bill length and bill depth with all 3 penguin species combined into a single data set. Is the correlation stronger or weaker compared to the correlation between bill length and bill depth for Gentoo penguins alone? Do you notice anything unexpected about this correlation?
 
 ```{r}
-cor.test(x=penguins$flipper_length_mm, y=penguins$body_mass_g, use="complete.obs")
+# Check normality assumption with a qqplot:
+ggplot(penguins) +
+  stat_qq(aes(sample=bill_length_mm))
+ggplot(penguins) +
+  stat_qq(aes(sample=bill_depth_mm))
 
-cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins)
-cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins %>% filter(species=="Adelie"))
-cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins %>% filter(species=="Gentoo"))
-cor.test(~flipper_length_mm + body_mass_g, use="complete.obs", data=penguins %>% filter(species=="Chinstrap"))
+cor.test(x=penguins$bill_length_mm, y=penguins$bill_depth_mm, use="complete.obs")
+# Correlation is much weaker with all penguins combined than with Gentoo alone
+# Correlation with all penguins combined is NEGATIVE - why would bill length get bigger as bill depth gets smaller?
 ```
+
+***
 
 ### Exercise 5.1
 
@@ -160,6 +180,8 @@ ggplot(data=gentoo, aes(x = flipper_length_mm, y = bill_depth_mm)) +
 ```
 
 The Adjusted $R^2$ is higher in the flipper model than in the bill length model, so flipper length does a better job of predicting bill depth for Gentoo penguins.
+
+***
 
 ### Exercise 5.2
 
