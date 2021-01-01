@@ -223,6 +223,3 @@ TukeyHSD(adelie_anova)  # Illogical analysis since ANOVA shows no difference btw
 ***
 
 
-
-
-
