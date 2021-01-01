@@ -185,40 +185,42 @@ The Adjusted $R^2$ is higher in the flipper model than in the bill length model,
 
 ### Exercise 5.2
 
-Build a linear regression to predict the bill depth of Gentoo penguins as a function of 2 explanatory continuous variables: bill length and flipper length. Do some exploratory data analysis and check model diagnostics. Use the function `vif()` to make sure that you don't have a problem with multicollinearity. Then use the function `AIC()` to compare the Akaike Information Criterion between this model and a simple linear regression we built before with bill depth as a function of just bill length. Use the help pages or the tutorial on regression diagnostics in this unit to make sure you are using `vif()` and `AIC()` correctly. What are your findings? Plot the data, the model predictions and the 95% confidence intervals or the standard errors.
-
-####3!!!!!!!!!!!1######### Work on how we'll plot the predictions for 2 continuous variables
+Plot the model predictions from our model `lm_gentoo_3` so that we can see the variation in bill depth vs. flipper length while holding bill length and body mass constant at their medians.
 
 ```{r}
-library(gvlma) # gvlma()
-library(car)  # vif()
-library(ggiraph)
-library(ggiraphExtra) # ggPredict()
+gentoo = penguins %>% filter(species=="Gentoo")
+lm_gentoo_3 = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm + body_mass_g, data=gentoo)
 
-# Drop NA data before fitting model. This helps me avoid problems down the line with predict()
-gentoo = penguins %>%
-  filter(!is.na(bill_depth_mm),
-         !is.na(bill_length_mm),
-         !is.na(species),
-         species=="Gentoo")
+### Look at bill depth ~ flipper length while holding bill length and body mass constant
+# Use expand to get full range of 1 variable, then add in median of other variable(s) from original data
+newdata = gentoo %>% 
+  expand(flipper_length_mm) %>% # Full range of data (gets rid of other variables)
+  mutate(bill_length_mm = median(gentoo$bill_length_mm, na.rm=TRUE), 
+         body_mass_g = median(gentoo$body_mass_g, na.rm=TRUE))
 
-# Build simple linear regression
-lm_gentoo_1 = lm(bill_depth_mm ~ bill_length_mm, data=gentoo)
-summary(lm_gentoo_1)
-
-# Build multiregression
-lm_gentoo_3x = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm, data=gentoo)
-summary(lm_gentoo_3x) # bill length no longer significant
-
-vif(lm_gentoo_3x) # vif values < 2, no multicollinearity
-AIC(lm_gentoo_1, lm_gentoo_3x) # lm_gentoo_male_3x performs significantly better
-
-ggPredict(lm_gentoo_3x, se=TRUE, interactive=TRUE)
+lm_gentoo_3_predict = lm_gentoo_3 %>%
+  augment(newdat = newdata, se_fit=TRUE) %>%
+  mutate(lwr = .fitted - 1.96 * .se.fit, upr = .fitted + 1.96 * .se.fit) # Calculate 95% C.I. using SE
+# Plot the data and the model predictions
+ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_depth_mm), data=gentoo) + # original data
+  geom_ribbon(aes(ymin = lwr, ymax = upr, x = flipper_length_mm), alpha = .15, data=lm_gentoo_3_predict) +
+  geom_line(data=lm_gentoo_3_predict, aes(y = .fitted, x = flipper_length_mm), size = 1)
 ```
 
+***
 
+### Exercise 5.3
 
+Conduct an Analysis of Variance to determine whether Adelie body mass is significantly different between the three islands where observations were collected. Conduct a post-hoc Tukey test if appropriate.
 
+```{r}
+adelie_anova = aov(body_mass_g ~ island + sex, data=penguins %>% filter(species=="Adelie"))
+summary(adelie_anova)
+TukeyHSD(adelie_anova)  # Illogical analysis since ANOVA shows no difference btwn island
+```
+
+***
 
 
 

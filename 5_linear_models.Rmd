@@ -54,6 +54,7 @@ library(GGally) # ggPairs()
 library(ggiraph)
 library(ggiraphExtra) # ggPredict()
 library(broom)  # tidy() augment()
+library(car) # vif()
 
 # Exploratory data analysis:
 glimpse(penguins)
@@ -121,11 +122,15 @@ ggplot(data=penguins, aes(x=bill_length_mm, y=bill_depth_mm, color=species)) +
      geom_smooth(method = "lm")
 ```
 
-So that makes it very clear that running all three species together was a serious logical error, and it produced a completely untrue result that bill depth increases as bill length decreases In fact, when we split the three species apart, we can see that bill depth increases with increasing bill length (as you'd expect) and the relationships look pretty similar for each species. This is an example of Simpson's paradox, which occurs when trends that appear when a dataset is separated into groups reverse when the data are aggregated. Basically, when doing statistics, you want to use your brain and your gut to build models that make sense.
+So that makes it very clear that running all three species together was a serious logical error, and it produced a completely untrue result that bill depth increases as bill length decreases In fact, when we split the three species apart, we can see that bill depth increases with increasing bill length (as you'd expect) and the relationships look pretty similar for each species. This is an example of *Simpson's paradox*, which occurs when trends that appear when a dataset is separated into groups reverse when the data are aggregated. Basically, when doing statistics, you want to use your brain and your gut to build models that make sense.
+
+***
 
 ### Exercise 5.1
 
 Build a model predicting Gentoo bill length as a function of flipper length. Plot the predictions. Which explanatory variable (bill length vs. flipper length) does a better job of predicting bill depth? What is your evidence?
+
+***
 
 ### Multiple linear regression
 
@@ -312,6 +317,7 @@ If we plotted the `lm_4` predictions for each of the 3 species, the lines will p
 
 # Get model predictions with newdata
 newdata = penguins_lm_3 %>% expand(bill_length_mm, species)
+head(newdata)
 lm_4_predict = lm_4 %>%
   augment(newdat = newdata, se_fit=TRUE) %>%
   mutate(lwr = .fitted - 1.96 * .se.fit, upr = .fitted + 1.96 * .se.fit) # Calculate 95% C.I. using SE
@@ -324,9 +330,139 @@ ggplot() +
 
 As we expected, the distinct slopes of bill depth vs. bill length for each of the 3 species are almost parallel. Since the AIC values are lower (i.e. better fit) for lm_3, we would select that as our final model instead of lm_4. 
 
+***
+
+### Multiple regression with 2 continuous variables
+
+When including multiple independent variables in a regression, especially multiple continuous variables, you need to check the collinearity of your predictors. If 2 predictors `x1` and `x2` are extremely collinear, then you can bias your interpretation of the model because you can't objectively determine how much variation in `y` is caused by `x1` vs. `x2`. To deal with this, you should calculate the Variance Inflation Factor of your independent variables. If the VIF = 1, then your independent variables are not correlated. There are different thresholds set for VIF, but generally, if the VIF > 4 or 5, you have a moderate problem with multicollinearity and if the VIF > 10, you have a big problem with multicollinearity in your model. This statistic should be reported and model results should be interpreted with the VIF in mind. If you are more interested in a mechanistic model (i.e. figuring out WHAT drives `y`) rather than a predictive model (i.e. getting the BEST estimate of `y`) then you should use your best human judgement to remove predictor variables until the model results are more interpretable. 
+
+Let's try out a regression with 2 continuous variables. We'll look at Gentoo penguin bill depth as a function of bill length, flipper length and body mass. We'll use AIC() and step() to compare this complex model with the simpler models. We'll also use vif() to check if we have a problem with multicollinearity.
+
+```{r}
+library(car)  # vif()
+library(ggiraph)
+library(ggiraphExtra) # ggPredict()
+
+gentoo = penguins %>%
+  filter(species=="Gentoo")
+
+# Build simple linear regression 
+lm_gentoo_1 = lm(bill_depth_mm ~ bill_length_mm, data=gentoo)
+
+# Build multiregression with 2 variables
+lm_gentoo_2 = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm, data=gentoo)
+
+# Build multiregression with 3 variables
+lm_gentoo_3 = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm + body_mass_g, data=gentoo)
+
+vif(lm_gentoo_3) # vif values ~ 2, mild multicollinearity
+step(lm_gentoo_3)
+AIC(lm_gentoo_1, lm_gentoo_2, lm_gentoo_3) # lm_gentoo_male_3x performs significantly better
+
+# This is a mess
+ggPredict(lm_gentoo_3, se=TRUE, interactive=TRUE)
+```
+
+Plot predictions: ######### CHECK THIS AREA
+
+```{r}
+
+### Look at bill depth ~ body mass while holding bill length and flipper length constant
+# Use expand to get full range of 1 variable, then add in median of other variable(s) from original data
+newdata = gentoo %>% 
+  expand(body_mass_g) %>% # Full range of data (gets rid of other variables)
+  mutate(bill_length_mm = median(gentoo$bill_length_mm, na.rm=TRUE), 
+         flipper_length_mm = median(gentoo$flipper_length_mm, na.rm=TRUE))
+
+lm_gentoo_3_predict = lm_gentoo_3 %>%
+  augment(newdat = newdata, se_fit=TRUE) %>%
+  mutate(lwr = .fitted - 1.96 * .se.fit, upr = .fitted + 1.96 * .se.fit) # Calculate 95% C.I. using SE
+
+# Plot the data and the model predictions
+ggplot() +
+  geom_point(aes(x = body_mass_g, y = bill_depth_mm), data=gentoo) + # original data
+  geom_ribbon(aes(ymin = lwr, ymax = upr, x = body_mass_g), alpha = .15, data=lm_gentoo_3_predict) +
+  geom_line(data=lm_gentoo_3_predict, aes(y = .fitted, x = body_mass_g), size = 1) +
+  annotate("text", x=4250, y=17, size=8, label= paste0("flipper length = ", median(gentoo$flipper_length_mm, na.rm=TRUE), "mm")) +
+  annotate("text", x=4250, y=16.5, size=8, label= paste0("bill length = ", median(gentoo$bill_length_mm, na.rm=TRUE), "mm")) 
+
+### Design exercise so they have to plot the mo
+```
+
+### Exercise 5.2
+
+Plot the model predictions from our model `lm_gentoo_3` so that we can see the variation in bill depth vs. flipper length while holding bill length and body mass constant at their medians.
+
+```{r}
+gentoo = penguins %>% filter(species=="Gentoo")
+lm_gentoo_3 = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm + body_mass_g, data=gentoo)
+
+### Look at bill depth ~ flipper length while holding bill length and body mass constant
+# Use expand to get full range of 1 variable, then add in median of other variable(s) from original data
+newdata = gentoo %>% 
+  expand(flipper_length_mm) %>% # Full range of data (gets rid of other variables)
+  mutate(bill_length_mm = median(gentoo$bill_length_mm, na.rm=TRUE), 
+         body_mass_g = median(gentoo$body_mass_g, na.rm=TRUE))
+
+lm_gentoo_3_predict = lm_gentoo_3 %>%
+  augment(newdat = newdata, se_fit=TRUE) %>%
+  mutate(lwr = .fitted - 1.96 * .se.fit, upr = .fitted + 1.96 * .se.fit) # Calculate 95% C.I. using SE
+# Plot the data and the model predictions
+ggplot() +
+  geom_point(aes(x = flipper_length_mm, y = bill_depth_mm), data=gentoo) + # original data
+  geom_ribbon(aes(ymin = lwr, ymax = upr, x = flipper_length_mm), alpha = .15, data=lm_gentoo_3_predict) +
+  geom_line(data=lm_gentoo_3_predict, aes(y = .fitted, x = flipper_length_mm), size = 1)
+```
+
 ### Exercise 5.2
 
 Build a linear regression to predict the bill depth of Gentoo penguins as a function of 2 explanatory continuous variables: bill length and flipper length. Do some exploratory data analysis and check model diagnostics. Use the function `vif()` to make sure that you don't have a problem with multicollinearity. Then use the function `AIC()` to compare the Akaike Information Criterion between this model and a simple linear regression we built before with bill depth as a function of just bill length. Use the help pages or the tutorial on regression diagnostics in this unit to make sure you are using `vif()` and `AIC()` correctly. What are your findings? Plot the data, the model predictions and the 95% confidence intervals or the standard errors.
+
+***
+
+### ANOVA
+
+Analysis of Variance (ANOVA) is just a special case of linear regression where the independent predictor variables are all categorical variables. Mathematically, running an ANOVA is the same as running a linear model. You can build your linear model using `lm()` as before, and then print the output of the model using the function `anova()`, which presents the statistical output in a classic ANOVA table. I always like to emphasize how there are multiple ways to accomplish the same goals in programming! Another way to run an ANOVA is to use the `aov()` function to run an ANOVA  model directly. 
+
+```{r}
+head(penguins)
+# Conduct an ANOVA using lm()
+penguin_lm = lm(body_mass_g ~ species + sex, data=penguins)
+summary(penguin_lm)
+anova(penguin_lm)
+
+# Conduct the same ANOVA using aov()
+penguin_anova = aov(body_mass_g ~ species + sex, data=penguins)
+summary(penguin_anova)
+```
+
+Note that the output of the `anova(penguin_lm)` has all of the same statistics and results as `summary(penguin_anova)`. The output tells us that both species and sex are significant predictors of penguin body mass, but it doesn't tell us more than that. To find out which groups are associated with heavier vs. lighter body mass, simply calculate and compare the mean of the the two groups. With groups with 3 or more categories, we need to conduct a *post hoc* Tukey test.
+
+```{r}
+# which sex has higher body mass?
+penguins %>%
+  group_by(sex) %>%
+  summarize(mean_body_mass_g = mean(body_mass_g))
+
+# which species has higher body mass?
+penguins %>%
+  group_by(species) %>%
+  summarize(mean_body_mass_g = mean(body_mass_g, na.rm=TRUE))
+
+TukeyHSD(penguin_anova)  # Requires the output of the aov() function
+```
+
+So the post-hoc Tukey test tells us that Chinstrap and Adelie penguin body mass is not significantly different (p>0.05), however, both Chinstrap and Adelie penguins body mass are each significantly different from Gentoo penguins (p<0.05). We know from simply calculating the means for those species separately that, in fact, Adelie and Chinstrap body mass is *significantly less than* Gentoo body mass. Tada!
+
+ANOVA is pretty robust to not-quite-normal data, but if you have a big normality problem you can switch to the Kruskall Wallace test `kruskal.test()`.
+
+***
+
+### Exercise 5.3
+
+Conduct an Analysis of Variance to determine whether Adelie body mass is significantly different between the three islands where observations were collected. Conduct a post-hoc Tukey test if appropriate.
+
+***
 
 ### More information
 
