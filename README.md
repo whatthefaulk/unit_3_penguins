@@ -9,11 +9,11 @@ This unit will cover data manipulation and visualization using the `Tidyverse` s
 
 ***
 
-#### Homework: HW_3_penguins Due: 3/10/2021
+#### Homework: HW_3_penguins Due: 3/15/2021
 
--  HW_3a_t-tests - Assigned: 2/24/2021, Due: 3/10/2021
+-  HW_3a_t-tests - Assigned: 3/1/2021, Due: 3/15/2021
 
--  HW_3b_penguin_taxidermy - Assigned: 3/3/2021, Due: 3/10/2021
+-  HW_3b_penguin_taxidermy - Assigned: 3/8/2021, Due: 3/15/2021
 
 (HW_3_penguins is HW_3a and HW_3b combined in the same repo called `HW_3_penguins`)
 
